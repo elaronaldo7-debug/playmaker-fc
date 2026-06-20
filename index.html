@@ -191,6 +191,30 @@ body{overflow:hidden}
 .del-btn{width:42px;align-self:stretch;background:rgba(192,57,43,.12);border:none;border-left:1px solid var(--border);color:#ef9a9a;font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center}
 .edit-on .del-btn{display:flex}
 .edit-on .pcard-btns{display:none}
+.edit-on .prof-btn{display:none}
+.prof-btn{width:38px;align-self:stretch;background:rgba(100,120,200,.12);border:none;border-left:1px solid var(--border);color:rgba(150,170,255,.8);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.prof-btn:active{background:rgba(100,120,200,.25)}
+
+/* BIRTHDAY NOTIFICATION */
+.bday-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:flex-end;justify-content:center;animation:fadein .3s}
+.bday-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:600px;padding:20px 18px 32px;box-shadow:0 -8px 40px rgba(0,0,0,.5)}
+.bday-handle{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 14px}
+.bday-title{font-family:var(--fh);font-size:20px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px}
+.bday-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:16px}
+.bday-list{display:flex;flex-direction:column;gap:10px;max-height:55vh;overflow-y:auto}
+.bday-card{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+.bday-card.today{border-color:rgba(255,200,0,.4);background:rgba(255,200,0,.07)}
+.bday-card.tomorrow{border-color:rgba(100,180,255,.3);background:rgba(100,180,255,.05)}
+.bday-av{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.bday-av.today{background:rgba(255,200,0,.15)}
+.bday-av.tmr{background:rgba(100,180,255,.1)}
+.bday-info{flex:1;min-width:0}
+.bday-name{font-size:14px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bday-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.bday-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0}
+.bday-badge.today{background:rgba(255,200,0,.2);color:#ffd54f}
+.bday-badge.tmr{background:rgba(100,180,255,.15);color:#90caf9}
+.bday-close{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#f9a825,#e65100);color:#fff;font-family:var(--fh);font-size:17px;font-weight:700;cursor:pointer;margin-top:14px}
 
 /* NOTES — improved with save indicator */
 .notes-box{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:12px;border:1px solid var(--border)}
@@ -240,6 +264,20 @@ body{overflow:hidden}
 .hdn.a{background:rgba(192,57,43,.2);color:#f5a09a;border:1px solid rgba(192,57,43,.25)}
 .hist-note-box{padding:8px 12px;background:rgba(232,176,74,.08);border-top:1px solid rgba(232,176,74,.15)}
 .hist-note-txt{font-size:11px;color:var(--gold);font-style:italic}
+
+/* PLAYER PROFILE MODAL */
+.profile-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:flex;align-items:flex-end;justify-content:center;animation:fadein .2s}
+.profile-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;padding:20px 18px 32px;box-shadow:0 -8px 40px rgba(0,0,0,.5)}
+.profile-handle{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 18px}
+.profile-name{font-family:var(--fh);font-size:22px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px}
+.profile-cat{font-size:12px;color:var(--muted);text-align:center;margin-bottom:18px;text-transform:uppercase;letter-spacing:.06em}
+.profile-field{margin-bottom:14px}
+.profile-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:5px}
+.profile-input{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;padding:10px 12px;font-family:var(--fb);outline:none;box-sizing:border-box}
+.profile-input:focus{border-color:rgba(255,255,255,.3)}
+.profile-save-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--blue),var(--red));color:#fff;font-family:var(--fh);font-size:18px;font-weight:700;cursor:pointer;margin-top:8px}
+.profile-close-btn{width:100%;padding:11px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--muted);font-family:var(--fb);font-size:13px;cursor:pointer;margin-top:8px}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
 
 /* MONTHLY REPORT */
 .rep-hdr{padding:14px 14px 10px;max-width:600px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
@@ -444,22 +482,23 @@ const PASSWORDS = {
   "playmaker2024":"Coach","admin123":"Admin","coach2024":"Coach","evening":"Staff"
 };
 const DEFAULT_PLAYERS = {
+  "COACHES":["ARUP","DINESH","ELA","MYCAL","PUGAZH","VICKY"],
   "BASIC 1":["AHIL KARTHIKEYAN","DHIYAN","DHEERAJ","SRI KRISHNA","PRASENNAJITH","HARASHAVARADHAN","ABIGAIL","NIGARTHTHANA","TEJESHVARAN","YUGAN","MITHRAN","MOGITHRAN","DHAKSHIN","MADHAV","SUJAN","AARON PHILIP","AARUSH ABHILASH","SAI KRISHNA","ARJUN","THANOOSH TEJA","ANUJ","ELAMBHAARATHI","SAKTHI DHARAN","KRISH","SIVA PRIYA","KOWSHIKA","PRANAV","INIDHA","ISHAAN","RITHUVA"],
   "BASIC 2":["SUGANANDARAJA","DEESHITHAN","RAHUL","RAGHAV","ABINOAM","GUHAN JAI","SHAZAN","ANISHWAR","AKSHITH","SAI CHARAN","VINISH","RAJA RAM","SENTHIL BALAJI","KISHAN","JANITH","MRUTHYUN","RAJA GOPAL","INIYAVAN","JASWIN SELLAN","NIVAN","SREEKAVAN"],
   "U7":["SATHYADEV","SUGANESHWARAN","SIDDHARTH","MITHRA","CHATRESH","MISHANTH"],
   "U9":["CHIRAYU","EON","NIVED KRISHNA (ADHI)","SANJEEVAN","KRITHICK","RIVAAN","DAVID","KAVIN","PRANAV","AADHI"],
   "U11":["BHAVIN","ROGITHRAAJ","RITHEESH","ADHIDEV","DHARMENDRA","AKHILINIYAN","NITHILAN","THEEKSHA","LOHITH"],
   "U13":["MADHAV KRISH","SHRIJITH","MAKESH PRIYAN","KOVARSHAN","SARVESH VARA","DINESH RAJ","HEMA RAJ","CHRIS JONATHAN","ANAV DEEPAK","AIDEN","ALWIN JOEL"],
-  "U15":["PRAKALATHAN","SANJAY","HEMNATH","SALAMON","PRADEEP (VISHAL)","ROHIT","BHARATH KUMAR","WIGGLES (VICKY)","HEMESH","ARAVIND","NAVEEN","MUHAYANTHU","EASWAR","STEPHAN","VEDANTT","SRIMAN","HARI"],
-  "COACHES":["ARUP","DINESH","ELA","MYCAL","PUGAZH","VICKY"]
+  "U15":["PRAKALATHAN","SANJAY","HEMNATH","SALAMON","PRADEEP (VISHAL)","ROHIT","BHARATH KUMAR","WIGGLES (VICKY)","HEMESH","ARAVIND","NAVEEN","MUHAYANTHU","EASWAR","STEPHAN","VEDANTT","SRIMAN","HARI"]
 };
+const CAT_ORDER = ["COACHES","BASIC 1","BASIC 2","U7","U9","U11","U13","U15"];
 const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋"};
 
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
-let S = { players:{}, att:{}, notes:{} };
-let activeTab = "BASIC 1";
+let S = { players:{}, att:{}, notes:{}, profiles:{} };
+let activeTab = "COACHES";
 let curDate = todayStr();
 let editMode = false;
 let curPage = "att";
@@ -470,7 +509,7 @@ let expandedHist = null;
 let isWriting = false;
 let deferredInstallPrompt = null;
 let repMonth = todayStr().slice(0,7);
-let repTab = "BASIC 1";
+let repTab = "COACHES";
 
 function todayStr(){ return new Date().toISOString().split("T")[0]; }
 function ini(n){ return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
@@ -554,6 +593,7 @@ function startFirebaseListener() {
     const remote = snapshot.val();
     if (remote && remote.players) {
       S = remote;
+      if(!S.profiles) S.profiles={};
       ensureDefaults();
     }
     setSyncOk();
@@ -634,6 +674,7 @@ function launchApp(role) {
   showScreen("appScreen");
   startFirebaseListener();
   renderApp();
+  setTimeout(checkBirthdays, 2500);
 }
 
 // ═══════════════════════════════════════
@@ -659,7 +700,7 @@ function updateGrandStats(){
 
 function buildCatTabs(){
   const bar=document.getElementById("catTabs"); bar.innerHTML="";
-  Object.keys(S.players).forEach(c=>{
+  CAT_ORDER.filter(c=>S.players[c]).forEach(c=>{
     const st=catStats(curDate,c);
     const el=document.createElement("div");
     el.className="ctab"+(c===activeTab?" on":"");
@@ -739,6 +780,7 @@ function pCard(cat,name){
       <div class="pcard-av">${ini(name)}</div>
       <div class="pcard-name">${esc(name)}</div>
     </div>
+    <button class="prof-btn" onclick="openProfile('${sc}','${sn}')">👤</button>
     <div class="pcard-btns">
       <button class="ptap tp" onclick="setP('${sc}','${sn}',true)"><div class="ptap-ic">✓</div><div>YES</div></button>
       <button class="ptap ta" onclick="setP('${sc}','${sn}',false)"><div class="ptap-ic">✕</div><div>NO</div></button>
@@ -746,6 +788,75 @@ function pCard(cat,name){
     <button class="del-btn" onclick="askDel('${sc}','${sn}')">🗑</button>
   </div>`;
 }
+
+// ═══════════════════════════════════════
+// PLAYER PROFILE
+// ═══════════════════════════════════════
+function getProfile(cat,name){
+  if(!S.profiles)S.profiles={};
+  const key=cat+"::"+name;
+  return S.profiles[key]||{};
+}
+function saveProfile(cat,name,data){
+  if(!S.profiles)S.profiles={};
+  const key=cat+"::"+name;
+  S.profiles[key]=data;
+  debounceSave();
+}
+
+window.openProfile=function(cat,name){
+  const isCoach=(cat==="COACHES");
+  const prof=getProfile(cat,name);
+  let fields="";
+  if(isCoach){
+    fields=`
+      <div class="profile-field"><div class="profile-label">Bio</div><textarea class="profile-input" id="pf_bio" rows="3" placeholder="Coach bio...">${esc(prof.bio||"")}</textarea></div>
+      <div class="profile-field"><div class="profile-label">Achievements</div><textarea class="profile-input" id="pf_ach" rows="3" placeholder="Coaching achievements...">${esc(prof.achievements||"")}</textarea></div>`;
+  } else {
+    fields=`
+      <div class="profile-field"><div class="profile-label">School & Standard</div><input class="profile-input" id="pf_school" value="${esc(prof.school||"")}" placeholder="e.g. St. Joseph's CBSE, Std 6"></div>
+      <div class="profile-field"><div class="profile-label">Date of Birth</div><input class="profile-input" id="pf_dob" type="date" value="${esc(prof.dob||"")}"></div>
+      <div class="profile-field"><div class="profile-label">Phone Number 1</div><input class="profile-input" id="pf_phone1" type="tel" value="${esc(prof.phone1||"")}" placeholder="Parent / Guardian 1"></div>
+      <div class="profile-field"><div class="profile-label">Phone Number 2</div><input class="profile-input" id="pf_phone2" type="tel" value="${esc(prof.phone2||"")}" placeholder="Parent / Guardian 2"></div>
+      <div class="profile-field"><div class="profile-label">Pickup Person</div><input class="profile-input" id="pf_pickup" value="${esc(prof.pickup||"")}" placeholder="Who picks up the player?"></div>`;
+  }
+  const overlay=document.createElement("div");
+  overlay.className="profile-overlay";
+  overlay.id="profileOverlay";
+  overlay.innerHTML=`<div class="profile-sheet">
+    <div class="profile-handle"></div>
+    <div class="profile-name">${esc(name)}</div>
+    <div class="profile-cat">${ICONS[cat]||"👥"} ${cat}</div>
+    ${fields}
+    <button class="profile-save-btn" onclick="saveProfileModal('${cat.replace(/'/g,"\\'")}','${name.replace(/'/g,"\\'")}')">💾 Save Profile</button>
+    <button class="profile-close-btn" onclick="closeProfile()">Close</button>
+  </div>`;
+  overlay.addEventListener("click",e=>{if(e.target===overlay)closeProfile();});
+  document.body.appendChild(overlay);
+};
+
+window.saveProfileModal=function(cat,name){
+  const isCoach=(cat==="COACHES");
+  let data={};
+  if(isCoach){
+    data.bio=document.getElementById("pf_bio")?document.getElementById("pf_bio").value:"";
+    data.achievements=document.getElementById("pf_ach")?document.getElementById("pf_ach").value:"";
+  } else {
+    data.school=document.getElementById("pf_school")?document.getElementById("pf_school").value:"";
+    data.dob=document.getElementById("pf_dob")?document.getElementById("pf_dob").value:"";
+    data.phone1=document.getElementById("pf_phone1")?document.getElementById("pf_phone1").value:"";
+    data.phone2=document.getElementById("pf_phone2")?document.getElementById("pf_phone2").value:"";
+    data.pickup=document.getElementById("pf_pickup")?document.getElementById("pf_pickup").value:"";
+  }
+  saveProfile(cat,name,data);
+  closeProfile();
+  toast("✅ Profile saved!");
+};
+
+window.closeProfile=function(){
+  const el=document.getElementById("profileOverlay");
+  if(el)el.remove();
+};
 
 // ═══════════════════════════════════════
 // ACTIONS
@@ -887,6 +998,93 @@ function renderHistory(){
 window.toggleHistExp = function(d){expandedHist=(expandedHist===d)?null:d;renderHistory();};
 
 // ═══════════════════════════════════════
+// BIRTHDAY NOTIFICATIONS
+// ═══════════════════════════════════════
+function checkBirthdays(){
+  if(!S.profiles) return;
+  const today = new Date();
+  const todayMM = String(today.getMonth()+1).padStart(2,'0');
+  const todayDD = String(today.getDate()).padStart(2,'0');
+  const tmr = new Date(today); tmr.setDate(tmr.getDate()+1);
+  const tmrMM = String(tmr.getMonth()+1).padStart(2,'0');
+  const tmrDD = String(tmr.getDate()).padStart(2,'0');
+
+  const birthdays = [];
+  Object.keys(S.profiles).forEach(key=>{
+    const prof = S.profiles[key];
+    if(!prof||!prof.dob) return;
+    const[,mm,dd] = prof.dob.split('-');
+    const[cat,name] = key.split('::');
+    if(mm===todayMM && dd===todayDD){
+      birthdays.push({name,cat,when:'today',age: today.getFullYear()-parseInt(prof.dob.split('-')[0])});
+    } else if(mm===tmrMM && dd===tmrDD){
+      birthdays.push({name,cat,when:'tomorrow',age: today.getFullYear()-parseInt(prof.dob.split('-')[0])+1});
+    }
+  });
+
+  if(!birthdays.length) return;
+
+  // Try browser notification
+  if('Notification' in window && Notification.permission==='granted'){
+    birthdays.filter(b=>b.when==='today').forEach(b=>{
+      new Notification(`🎂 Happy Birthday, ${b.name}!`,{
+        body:`${b.name} from ${b.cat} turns ${b.age} today! Wishing them a wonderful day.`,
+        icon:'/playmaker-fc/icon.png'
+      });
+    });
+  } else if('Notification' in window && Notification.permission!=='denied'){
+    Notification.requestPermission();
+  }
+
+  // Show in-app banner
+  const overlay = document.createElement('div');
+  overlay.className = 'bday-overlay';
+  overlay.id = 'bdayOverlay';
+
+  const todayList = birthdays.filter(b=>b.when==='today');
+  const tmrList = birthdays.filter(b=>b.when==='tomorrow');
+
+  let cards = '';
+  todayList.forEach(b=>{
+    cards+=`<div class="bday-card today">
+      <div class="bday-av today">🎂</div>
+      <div class="bday-info">
+        <div class="bday-name">${esc(b.name)}</div>
+        <div class="bday-meta">${esc(b.cat)} · Turns ${b.age} today</div>
+      </div>
+      <div class="bday-badge today">Today! 🎉</div>
+    </div>`;
+  });
+  tmrList.forEach(b=>{
+    cards+=`<div class="bday-card tomorrow">
+      <div class="bday-av tmr">🗓️</div>
+      <div class="bday-info">
+        <div class="bday-name">${esc(b.name)}</div>
+        <div class="bday-meta">${esc(b.cat)} · Turns ${b.age} tomorrow</div>
+      </div>
+      <div class="bday-badge tmr">Tomorrow</div>
+    </div>`;
+  });
+
+  const title = todayList.length
+    ? `🎂 Birthday${todayList.length>1?'s':''} Today!`
+    : `🗓️ Upcoming Birthday`;
+  const sub = todayList.length
+    ? `Don't forget to wish ${todayList.length===1?todayList[0].name:'them'}!`
+    : `A gentle reminder for tomorrow`;
+
+  overlay.innerHTML=`<div class="bday-sheet">
+    <div class="bday-handle"></div>
+    <div class="bday-title">${title}</div>
+    <div class="bday-sub">${sub}</div>
+    <div class="bday-list">${cards}</div>
+    <button class="bday-close" onclick="document.getElementById('bdayOverlay').remove()">Got it! 👍</button>
+  </div>`;
+
+  document.body.appendChild(overlay);
+}
+
+// ═══════════════════════════════════════
 // MONTHLY REPORT
 // ═══════════════════════════════════════
 function monthKey(d){ return d.slice(0,7); }
@@ -960,7 +1158,7 @@ function renderReport(){
 
 function buildRepCatTabs(){
   const bar=document.getElementById("repCatTabs"); bar.innerHTML="";
-  Object.keys(S.players).forEach(c=>{
+  CAT_ORDER.filter(c=>S.players[c]).forEach(c=>{
     const st=repCatStats(repMonth,c);
     const el=document.createElement("div");
     el.className="ctab"+(c===repTab?" on":"");
