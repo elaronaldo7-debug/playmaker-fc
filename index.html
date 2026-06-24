@@ -195,26 +195,62 @@ body{overflow:hidden}
 .prof-btn{width:38px;align-self:stretch;background:rgba(100,120,200,.12);border:none;border-left:1px solid var(--border);color:rgba(150,170,255,.8);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .prof-btn:active{background:rgba(100,120,200,.25)}
 
-/* BIRTHDAY NOTIFICATION */
-.bday-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:flex-end;justify-content:center;animation:fadein .3s}
-.bday-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:600px;padding:20px 18px 32px;box-shadow:0 -8px 40px rgba(0,0,0,.5)}
-.bday-handle{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 14px}
-.bday-title{font-family:var(--fh);font-size:20px;font-weight:700;color:#fff;text-align:center;margin-bottom:4px}
-.bday-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:16px}
-.bday-list{display:flex;flex-direction:column;gap:10px;max-height:55vh;overflow-y:auto}
-.bday-card{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
-.bday-card.today{border-color:rgba(255,200,0,.4);background:rgba(255,200,0,.07)}
-.bday-card.tomorrow{border-color:rgba(100,180,255,.3);background:rgba(100,180,255,.05)}
-.bday-av{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.bday-av.today{background:rgba(255,200,0,.15)}
-.bday-av.tmr{background:rgba(100,180,255,.1)}
-.bday-info{flex:1;min-width:0}
-.bday-name{font-size:14px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bday-meta{font-size:11px;color:var(--muted);margin-top:2px}
-.bday-badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0}
-.bday-badge.today{background:rgba(255,200,0,.2);color:#ffd54f}
-.bday-badge.tmr{background:rgba(100,180,255,.15);color:#90caf9}
-.bday-close{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#f9a825,#e65100);color:#fff;font-family:var(--fh);font-size:17px;font-weight:700;cursor:pointer;margin-top:14px}
+/* SEARCH BAR */
+.search-wrap{padding:8px 10px 4px;max-width:600px;margin:0 auto}
+.search-inp{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;padding:10px 14px 10px 36px;font-family:var(--fb);outline:none;box-sizing:border-box;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='rgba(255,255,255,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center}
+.search-inp:focus{border-color:rgba(255,255,255,.25)}
+.search-result-cat{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px 4px}
+
+/* NAME EDIT INLINE */
+.pcard-name-edit{font-size:13px;font-weight:500;color:var(--text);flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:2px 8px;outline:none;font-family:var(--fb)}
+.rename-btn{width:38px;align-self:stretch;background:rgba(255,200,0,.1);border:none;border-left:1px solid var(--border);color:#ffd54f;font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.edit-on .rename-btn{display:flex}
+
+/* DRAG HANDLE */
+.drag-handle{width:28px;align-self:stretch;display:none;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:14px;cursor:grab;touch-action:none;border-right:1px solid var(--border)}
+.edit-on .drag-handle{display:flex}
+.pcard.dragging{opacity:.4;border:2px dashed var(--gold)!important}
+.pcard.drag-over{border-top:2px solid var(--gold)!important}
+.bday-strip{margin:0 10px 8px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,rgba(255,180,0,.1),rgba(255,100,0,.08));border:1px solid rgba(255,200,0,.25)}
+.bday-strip-row{display:flex;align-items:center;gap:10px;padding:9px 13px;border-bottom:1px solid rgba(255,200,0,.1)}
+.bday-strip-row:last-child{border-bottom:none}
+.bday-strip-ic{font-size:18px;flex-shrink:0}
+.bday-strip-name{font-size:13px;font-weight:700;color:#fff;flex:1}
+.bday-strip-tag{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0}
+.bday-strip-tag.today{background:rgba(255,200,0,.2);color:#ffd54f}
+.bday-strip-tag.tmr{background:rgba(255,255,255,.08);color:rgba(255,255,255,.45)}
+
+/* BIRTHDAY NOTIFICATION - Instagram style */
+.bday-notif{
+  position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-120px);
+  z-index:2000;width:calc(100% - 28px);max-width:420px;
+  background:rgba(24,24,28,.96);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  padding:13px 14px 13px 13px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.3);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  cursor:pointer;
+  transition:transform .45s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+  opacity:0;
+}
+.bday-notif.show{transform:translateX(-50%) translateY(0);opacity:1}
+.bday-notif.hide{transform:translateX(-50%) translateY(-130px);opacity:0;transition:transform .35s ease-in,opacity .3s}
+.bday-notif-ic{
+  width:46px;height:46px;border-radius:14px;
+  background:linear-gradient(135deg,#f9a825,#e65100);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;flex-shrink:0;
+  box-shadow:0 4px 14px rgba(249,168,37,.35);
+}
+.bday-notif-body{flex:1;min-width:0}
+.bday-notif-app{font-size:10px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.bday-notif-title{font-size:13px;font-weight:700;color:#fff;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bday-notif-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bday-notif-time{font-size:10px;color:rgba(255,255,255,.3);flex-shrink:0;align-self:flex-start;margin-top:2px}
+.bday-progress{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#f9a825,#e65100);border-radius:0 0 18px 18px;animation:bdayprog var(--dur,6s) linear forwards}
+@keyframes bdayprog{from{width:100%}to{width:0%}}
 
 /* NOTES — improved with save indicator */
 .notes-box{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:12px;border:1px solid var(--border)}
@@ -394,8 +430,15 @@ body{overflow:hidden}
 
   <div class="page on" id="pageAtt">
     <div id="installBannerWrap"></div>
-    <div class="cat-tabs" id="catTabs"></div>
-    <div class="content" id="content"></div>
+    <div id="bdayStrip"></div>
+    <div class="search-wrap">
+      <input class="search-inp" id="searchInp" placeholder="Search players..." oninput="onSearch(this.value)" autocomplete="off">
+    </div>
+    <div id="searchResults" style="display:none"></div>
+    <div id="attMain">
+      <div class="cat-tabs" id="catTabs"></div>
+      <div class="content" id="content"></div>
+    </div>
   </div>
 
   <div class="page" id="pageHist">
@@ -443,6 +486,7 @@ body{overflow:hidden}
 <div class="overlay" id="expModal" onclick="if(event.target===this)hideModal('expModal')">
   <div class="modal">
     <div class="modal-t">📤 Export Attendance</div>
+    <div id="expBdaySection" style="margin-bottom:12px"></div>
     <div class="exp-grid">
       <button class="ebtn full" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;font-weight:700;font-size:15px;padding:16px" onclick="shareWACurrent();hideModal('expModal')">💬 Share to WhatsApp</button>
     </div>
@@ -685,6 +729,31 @@ function renderApp(){
   document.getElementById("monthInp").value = repMonth;
   ensureDefaults();
   buildCatTabs(); renderContent(); updateGrandStats();
+  renderBdayStrip();
+}
+
+function renderBdayStrip(){
+  const sec=document.getElementById('bdayStrip');
+  if(!sec) return;
+  const b=getBirthdaysForExport();
+  if(!b.today.length&&!b.tomorrow.length){sec.innerHTML='';return;}
+  let h='<div class="bday-strip">';
+  b.today.forEach(p=>{
+    h+=`<div class="bday-strip-row">
+      <span class="bday-strip-ic">🎂</span>
+      <span class="bday-strip-name">${esc(p.name)} <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:400">(${esc(p.cat)})</span></span>
+      <span class="bday-strip-tag today">Today 🎉</span>
+    </div>`;
+  });
+  b.tomorrow.forEach(p=>{
+    h+=`<div class="bday-strip-row">
+      <span class="bday-strip-ic">🎂</span>
+      <span class="bday-strip-name">${esc(p.name)} <span style="font-size:11px;color:rgba(255,255,255,.4);font-weight:400">(${esc(p.cat)})</span></span>
+      <span class="bday-strip-tag tmr">Tomorrow</span>
+    </div>`;
+  });
+  h+='</div>';
+  sec.innerHTML=h;
 }
 
 window.onDateChange = function(){ curDate=document.getElementById("dateInp").value; buildCatTabs(); renderContent(); updateGrandStats(); };
@@ -750,10 +819,10 @@ function renderContent(){
   const ab=pl.filter(n=>getA(curDate,c,n)===false);
   const um=pl.filter(n=>getA(curDate,c,n)===null);
 
-  h+=`<div class="plist${ec}">`;
-  if(pr.length){h+=`<div class="sec-h sp">✓ Present · ${pr.length}</div>`;pr.forEach(n=>h+=pCard(c,n));}
-  if(ab.length){h+=`<div class="sec-h sa">✕ Absent · ${ab.length}</div>`;ab.forEach(n=>h+=pCard(c,n));}
-  if(um.length){h+=`<div class="sec-h">— Unmarked · ${um.length}</div>`;um.forEach(n=>h+=pCard(c,n));}
+  h+=`<div class="plist${ec}" id="plist">`;
+  if(pr.length){h+=`<div class="sec-h sp">✓ Present · ${pr.length}</div>`;pr.forEach(n=>h+=pCard(c,n,editMode));}
+  if(ab.length){h+=`<div class="sec-h sa">✕ Absent · ${ab.length}</div>`;ab.forEach(n=>h+=pCard(c,n,editMode));}
+  if(um.length){h+=`<div class="sec-h">— Unmarked · ${um.length}</div>`;um.forEach(n=>h+=pCard(c,n,editMode));}
   h+=`</div>`;
 
   // NOTES — fixed with visible save status
@@ -770,16 +839,20 @@ function renderContent(){
   if(editMode){const ai=document.getElementById("addInp");if(ai)setTimeout(()=>ai.focus(),100);}
 }
 
-function pCard(cat,name){
+function pCard(cat,name,draggable=false){
   const s=getA(curDate,cat,name);
   const cls=s===true?"pp":s===false?"pa":"";
   const sc=cat.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
   const sn=name.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-  return `<div class="pcard ${cls}">
+  const drag=draggable?`draggable="true" ondragstart="dragStart(event,'${sc}','${sn}')" ondragover="dragOver(event)" ondrop="dragDrop(event,'${sc}','${sn}')" ondragend="dragEnd(event)"ondragleave="dragLeave(event)"`:'' ;
+  return `<div class="pcard ${cls}" data-cat="${sc}" data-name="${sn}" ${drag}>
+    <div class="drag-handle" title="Drag to reorder">⠿</div>
     <div class="pcard-body" onclick="tapP('${sc}','${sn}')">
       <div class="pcard-av">${ini(name)}</div>
+      <input class="pcard-name-edit" value="${esc(name)}" style="display:none" onkeydown="if(event.key==='Enter')saveRename('${sc}','${sn}',this.value)">
       <div class="pcard-name">${esc(name)}</div>
     </div>
+    <button class="rename-btn" onclick="startRename(this)" title="Rename">✏️</button>
     <button class="prof-btn" onclick="openProfile('${sc}','${sn}')">👤</button>
     <div class="pcard-btns">
       <button class="ptap tp" onclick="setP('${sc}','${sn}',true)"><div class="ptap-ic">✓</div><div>YES</div></button>
@@ -885,6 +958,115 @@ window.toggleEdit = function(){
   btn.textContent=editMode?"✅ Done":"✏️ Edit";
   btn.className="edit-btn"+(editMode?" on":"");
   renderContent();
+};
+
+// ── SEARCH ──────────────────────────────
+window.onSearch = function(q){
+  const sr=document.getElementById('searchResults');
+  const am=document.getElementById('attMain');
+  q=q.trim().toUpperCase();
+  if(!q){sr.style.display='none';am.style.display='';return;}
+  am.style.display='none'; sr.style.display='';
+  let h='<div class="content">';
+  let found=0;
+  CAT_ORDER.filter(c=>S.players[c]).forEach(c=>{
+    const matches=(S.players[c]||[]).filter(n=>n.toUpperCase().includes(q));
+    if(!matches.length) return;
+    h+=`<div class="search-result-cat">${ICONS[c]||'👥'} ${c}</div>`;
+    matches.forEach(n=>{h+=pCard(c,n);found++;});
+  });
+  if(!found) h+=`<div class="hist-empty"><div class="he-ic">🔍</div>No players found.</div>`;
+  h+='</div>';
+  sr.innerHTML=h;
+};
+
+// ── RENAME ──────────────────────────────
+window.startRename = function(btn){
+  const card=btn.closest('.pcard');
+  const nameDiv=card.querySelector('.pcard-name');
+  const nameInp=card.querySelector('.pcard-name-edit');
+  nameDiv.style.display='none';
+  nameInp.style.display='';
+  nameInp.focus(); nameInp.select();
+  btn.textContent='💾';
+  btn.onclick=()=>saveRename(card.dataset.cat,card.dataset.name,nameInp.value,btn);
+  nameInp.onkeydown=e=>{
+    if(e.key==='Enter') saveRename(card.dataset.cat,card.dataset.name,nameInp.value,btn);
+    if(e.key==='Escape'){nameDiv.style.display='';nameInp.style.display='none';btn.textContent='✏️';btn.onclick=()=>startRename(btn);}
+  };
+};
+
+window.saveRename = function(cat,oldName,newName){
+  newName=newName.trim().toUpperCase();
+  if(!newName||newName===oldName){renderContent();return;}
+  const pl=S.players[cat]||[];
+  const idx=pl.indexOf(oldName);
+  if(idx===-1){toast('Player not found!');return;}
+  if(pl.includes(newName)){toast('Name already exists!');return;}
+  S.players[cat][idx]=newName;
+  Object.keys(S.att||{}).forEach(d=>{
+    if(S.att[d]&&S.att[d][cat]&&oldName in S.att[d][cat]){
+      S.att[d][cat][newName]=S.att[d][cat][oldName];
+      delete S.att[d][cat][oldName];
+    }
+  });
+  if(S.profiles){
+    const ok=cat+'::'+oldName,nk=cat+'::'+newName;
+    if(S.profiles[ok]){S.profiles[nk]=S.profiles[ok];delete S.profiles[ok];}
+  }
+  debounceSave();
+  toast('✅ Renamed to '+newName);
+  renderContent();
+};
+
+// ── DRAG & DROP ─────────────────────────
+let dragSrc={cat:null,name:null};
+
+window.dragStart=function(e,cat,name){
+  dragSrc={cat,name};
+  setTimeout(()=>e.currentTarget.classList.add('dragging'),0);
+  e.dataTransfer.effectAllowed='move';
+};
+window.dragEnd=function(e){
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('drag-over'));
+};
+window.dragOver=function(e){
+  e.preventDefault();
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('drag-over'));
+  e.currentTarget.classList.add('drag-over');
+};
+window.dragLeave=function(e){e.currentTarget.classList.remove('drag-over');};
+window.dragDrop=function(e,toCat,toName){
+  e.preventDefault();
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('drag-over'));
+  const{cat:fromCat,name:fromName}=dragSrc;
+  if(fromName===toName&&fromCat===toCat) return;
+  const src=S.players[fromCat]||[];
+  const srcIdx=src.indexOf(fromName);
+  if(srcIdx===-1) return;
+  src.splice(srcIdx,1);
+  const tgt=S.players[toCat]||[];
+  const tgtIdx=tgt.indexOf(toName);
+  tgt.splice(tgtIdx===-1?tgt.length:tgtIdx,0,fromName);
+  if(fromCat!==toCat){
+    Object.keys(S.att||{}).forEach(d=>{
+      if(!S.att[d]) return;
+      if(!S.att[d][toCat]) S.att[d][toCat]={};
+      if(S.att[d][fromCat]&&fromName in S.att[d][fromCat]){
+        S.att[d][toCat][fromName]=S.att[d][fromCat][fromName];
+        delete S.att[d][fromCat][fromName];
+      }
+    });
+    if(S.profiles){
+      const ok=fromCat+'::'+fromName,nk=toCat+'::'+fromName;
+      if(S.profiles[ok]){S.profiles[nk]=S.profiles[ok];delete S.profiles[ok];}
+    }
+    activeTab=toCat;
+  }
+  debounceSave();
+  buildCatTabs(); renderContent();
+  toast('✅ '+(fromCat!==toCat?fromName+' moved to '+toCat:'Reordered!'));
 };
 
 window.addPlayer = function(){
@@ -1013,75 +1195,63 @@ function checkBirthdays(){
   Object.keys(S.profiles).forEach(key=>{
     const prof = S.profiles[key];
     if(!prof||!prof.dob) return;
-    const[,mm,dd] = prof.dob.split('-');
+    const parts = prof.dob.split('-');
+    const mm=parts[1], dd=parts[2];
     const[cat,name] = key.split('::');
+    const age = today.getFullYear() - parseInt(parts[0]);
     if(mm===todayMM && dd===todayDD){
-      birthdays.push({name,cat,when:'today',age: today.getFullYear()-parseInt(prof.dob.split('-')[0])});
+      birthdays.push({name,cat,when:'today',age});
     } else if(mm===tmrMM && dd===tmrDD){
-      birthdays.push({name,cat,when:'tomorrow',age: today.getFullYear()-parseInt(prof.dob.split('-')[0])+1});
+      birthdays.push({name,cat,when:'tomorrow',age:age+1});
     }
   });
 
   if(!birthdays.length) return;
 
-  // Try browser notification
-  if('Notification' in window && Notification.permission==='granted'){
-    birthdays.filter(b=>b.when==='today').forEach(b=>{
-      new Notification(`🎂 Happy Birthday, ${b.name}!`,{
-        body:`${b.name} from ${b.cat} turns ${b.age} today! Wishing them a wonderful day.`,
-        icon:'/playmaker-fc/icon.png'
-      });
+  // Request browser notification permission
+  if('Notification' in window && Notification.permission!=='denied'){
+    Notification.requestPermission().then(p=>{
+      if(p==='granted'){
+        birthdays.filter(b=>b.when==='today').forEach(b=>{
+          new Notification(`🎂 Happy Birthday, ${b.name}!`,{
+            body:`${b.name} (${b.cat}) turns ${b.age} today! 🎉`,
+            icon:'/playmaker-fc/icon.png'
+          });
+        });
+      }
     });
-  } else if('Notification' in window && Notification.permission!=='denied'){
-    Notification.requestPermission();
   }
 
-  // Show in-app banner
-  const overlay = document.createElement('div');
-  overlay.className = 'bday-overlay';
-  overlay.id = 'bdayOverlay';
-
-  const todayList = birthdays.filter(b=>b.when==='today');
-  const tmrList = birthdays.filter(b=>b.when==='tomorrow');
-
-  let cards = '';
-  todayList.forEach(b=>{
-    cards+=`<div class="bday-card today">
-      <div class="bday-av today">🎂</div>
-      <div class="bday-info">
-        <div class="bday-name">${esc(b.name)}</div>
-        <div class="bday-meta">${esc(b.cat)} · Turns ${b.age} today</div>
-      </div>
-      <div class="bday-badge today">Today! 🎉</div>
-    </div>`;
+  // Show Instagram-style stacked banners with delay
+  birthdays.forEach((b, i) => {
+    setTimeout(() => showBdayBanner(b), i * 800);
   });
-  tmrList.forEach(b=>{
-    cards+=`<div class="bday-card tomorrow">
-      <div class="bday-av tmr">🗓️</div>
-      <div class="bday-info">
-        <div class="bday-name">${esc(b.name)}</div>
-        <div class="bday-meta">${esc(b.cat)} · Turns ${b.age} tomorrow</div>
-      </div>
-      <div class="bday-badge tmr">Tomorrow</div>
-    </div>`;
-  });
+}
 
-  const title = todayList.length
-    ? `🎂 Birthday${todayList.length>1?'s':''} Today!`
-    : `🗓️ Upcoming Birthday`;
-  const sub = todayList.length
-    ? `Don't forget to wish ${todayList.length===1?todayList[0].name:'them'}!`
-    : `A gentle reminder for tomorrow`;
+function showBdayBanner(b){
+  const isToday = b.when === 'today';
+  const dur = 6;
+  const notif = document.createElement('div');
+  notif.className = 'bday-notif';
+  notif.style.setProperty('--dur', dur+'s');
+  notif.innerHTML = `
+    <div class="bday-notif-ic">${isToday ? '🎂' : '🗓️'}</div>
+    <div class="bday-notif-body">
+      <div class="bday-notif-app">Playmaker FC · Birthday</div>
+      <div class="bday-notif-title">${isToday ? `Happy Birthday, ${esc(b.name)}! 🎉` : `Tomorrow — ${esc(b.name)}'s Birthday 🎂`}</div>
+      <div class="bday-notif-sub">${esc(b.cat)} · Turns ${b.age} ${isToday ? 'today' : 'tomorrow'}</div>
+    </div>
+    <div class="bday-notif-time">now</div>
+    <div class="bday-progress"></div>`;
+  notif.onclick = () => dismissBdayBanner(notif);
+  document.body.appendChild(notif);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>notif.classList.add('show')));
+  setTimeout(()=>dismissBdayBanner(notif), dur * 1000);
+}
 
-  overlay.innerHTML=`<div class="bday-sheet">
-    <div class="bday-handle"></div>
-    <div class="bday-title">${title}</div>
-    <div class="bday-sub">${sub}</div>
-    <div class="bday-list">${cards}</div>
-    <button class="bday-close" onclick="document.getElementById('bdayOverlay').remove()">Got it! 👍</button>
-  </div>`;
-
-  document.body.appendChild(overlay);
+function dismissBdayBanner(el){
+  el.classList.add('hide');
+  setTimeout(()=>el.remove(), 400);
 }
 
 // ═══════════════════════════════════════
@@ -1319,6 +1489,22 @@ window.shareWACurrent = function(){
     msg+="*Not Marked ("+um.length+")*: "+um.join(", ")+"\n\n";
   }
 
+  // Birthday section
+  const bdays = getBirthdaysForExport();
+  if(bdays.today.length || bdays.tomorrow.length){
+    msg+="--------------------\n";
+    if(bdays.today.length){
+      msg+="🎂 *Birthday Today!*\n";
+      bdays.today.forEach(b=>msg+="🎂 "+b.name+" ("+b.cat+")\n");
+      msg+="\n";
+    }
+    if(bdays.tomorrow.length){
+      msg+="🎂 *Birthday Tomorrow!*\n";
+      bdays.tomorrow.forEach(b=>msg+="🎂 "+b.name+" ("+b.cat+")\n");
+      msg+="\n";
+    }
+  }
+
   msg+="--------------------\n";
   msg+=pr.length+"/"+pl.length+" present";
   if(nt) msg+="\nNotes: "+nt;
@@ -1402,7 +1588,54 @@ window.shareHistWA = function(d){
 // ═══════════════════════════════════════
 function dl(fn,ct,tp){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([ct],{type:tp}));a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);}
 function fbCopy(t){const ta=document.createElement("textarea");ta.value=t;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);toast("📱 Copied!");}
-window.showModal = function(id){document.getElementById(id).classList.add("open");};
+window.showModal = function(id){
+  document.getElementById(id).classList.add("open");
+  if(id==='expModal') renderExpBirthdays();
+};
+
+function getBirthdaysForExport(){
+  const today=new Date();
+  const tMM=String(today.getMonth()+1).padStart(2,'0'), tDD=String(today.getDate()).padStart(2,'0');
+  const tmr=new Date(today); tmr.setDate(tmr.getDate()+1);
+  const rMM=String(tmr.getMonth()+1).padStart(2,'0'), rDD=String(tmr.getDate()).padStart(2,'0');
+  const res={today:[],tomorrow:[]};
+  if(!S.profiles) return res;
+  Object.keys(S.profiles).forEach(key=>{
+    const p=S.profiles[key];
+    if(!p||!p.dob) return;
+    const[yr,mm,dd]=p.dob.split('-');
+    const[cat,name]=key.split('::');
+    const age=today.getFullYear()-parseInt(yr);
+    if(mm===tMM&&dd===tDD) res.today.push({name,cat,age});
+    else if(mm===rMM&&dd===rDD) res.tomorrow.push({name,cat,age:age+1});
+  });
+  return res;
+}
+
+function renderExpBirthdays(){
+  const sec=document.getElementById('expBdaySection');
+  if(!sec) return;
+  const b=getBirthdaysForExport();
+  if(!b.today.length&&!b.tomorrow.length){sec.innerHTML='';return;}
+  let h=`<div style="background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.3);border-radius:12px;padding:12px 14px">
+    <div style="font-size:10px;font-weight:700;color:rgba(255,200,0,.7);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">🎂 Birthdays</div>`;
+  b.today.forEach(p=>{
+    h+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:20px">🎂</span>
+      <div><div style="font-size:13px;font-weight:700;color:#fff">${esc(p.name)}</div>
+      <div style="font-size:10px;color:#ffd54f">${esc(p.cat)} · Turns ${p.age} — <b>Today! 🎉</b></div></div>
+    </div>`;
+  });
+  b.tomorrow.forEach(p=>{
+    h+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <span style="font-size:20px">🎂</span>
+      <div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.85)">${esc(p.name)}</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.4)">${esc(p.cat)} · Turns ${p.age} — Tomorrow</div></div>
+    </div>`;
+  });
+  h+=`</div>`;
+  sec.innerHTML=h;
+}
 window.hideModal = function(id){document.getElementById(id).classList.remove("open");};
 function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500);}
 
