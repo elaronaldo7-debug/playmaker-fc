@@ -464,7 +464,6 @@ body{overflow:hidden}
 <div class="overlay" id="expModal" onclick="if(event.target===this)hideModal('expModal')">
   <div class="modal">
     <div class="modal-t">📤 Export Attendance</div>
-    <div id="expBdaySection" style="margin-bottom:12px"></div>
     <div class="exp-grid">
       <button class="ebtn full" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;font-weight:700;font-size:15px;padding:16px" onclick="shareWACurrent();hideModal('expModal')">💬 Share to WhatsApp</button>
     </div>
@@ -1467,21 +1466,7 @@ window.shareWACurrent = function(){
     msg+="*Not Marked ("+um.length+")*: "+um.join(", ")+"\n\n";
   }
 
-  // Birthday section
-  const bdays = getBirthdaysForExport();
-  if(bdays.today.length || bdays.tomorrow.length){
-    msg+="--------------------\n";
-    if(bdays.today.length){
-      msg+="🎂 *Birthday Today!*\n";
-      bdays.today.forEach(b=>msg+="🎂 "+b.name+" ("+b.cat+")\n");
-      msg+="\n";
-    }
-    if(bdays.tomorrow.length){
-      msg+="🎂 *Birthday Tomorrow!*\n";
-      bdays.tomorrow.forEach(b=>msg+="🎂 "+b.name+" ("+b.cat+")\n");
-      msg+="\n";
-    }
-  }
+  // Birthday section removed from WA share - app notification only
 
   msg+="--------------------\n";
   msg+=pr.length+"/"+pl.length+" present";
