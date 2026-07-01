@@ -199,6 +199,19 @@ body{overflow:hidden}
 .bday-strip-tag.today{background:rgba(255,200,0,.2);color:#ffd54f}
 .bday-strip-tag.tmr{background:rgba(255,255,255,.08);color:rgba(255,255,255,.45)}
 
+/* MOVE TO SHEET */
+.move-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:flex-end;justify-content:center;animation:fadein .2s}
+.move-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:600px;padding:16px 16px 32px;box-shadow:0 -8px 40px rgba(0,0,0,.5)}
+.move-handle{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 14px}
+.move-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;text-align:center}
+.move-cat-list{display:flex;flex-direction:column;gap:6px}
+.move-cat-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);cursor:pointer;font-size:14px;font-weight:600;color:var(--text)}
+.move-cat-item:active{background:rgba(255,255,255,.1)}
+.move-cat-item.current{border-color:var(--green);color:var(--green);background:rgba(56,142,60,.08)}
+.move-cat-item .move-check{margin-left:auto;font-size:16px}
+.move-btn{width:32px;align-self:stretch;background:rgba(100,200,150,.1);border:none;border-left:1px solid var(--border);color:rgba(100,220,150,.8);font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.edit-on .move-btn{display:flex}
+
 /* BIRTHDAY NOTIFICATION - Instagram style */
 .bday-notif{
   position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-120px);
@@ -779,7 +792,6 @@ function movePlayerToCategory(fromCat, name, toCat){
   src.splice(idx,1);
   if(!S.players[toCat]) S.players[toCat]=[];
   S.players[toCat].push(name);
-  // Move attendance data
   Object.keys(S.att||{}).forEach(d=>{
     if(!S.att[d]) return;
     if(!S.att[d][toCat]) S.att[d][toCat]={};
@@ -788,7 +800,6 @@ function movePlayerToCategory(fromCat, name, toCat){
       delete S.att[d][fromCat][name];
     }
   });
-  // Move profile
   if(S.profiles){
     const ok=fromCat+'::'+name, nk=toCat+'::'+name;
     if(S.profiles[ok]){S.profiles[nk]=S.profiles[ok];delete S.profiles[ok];}
@@ -798,6 +809,33 @@ function movePlayerToCategory(fromCat, name, toCat){
   buildCatTabs(); renderContent(); updateGrandStats();
   toast('✅ '+name+' moved to '+toCat);
 }
+
+window.openMoveSheet = function(cat, name){
+  const overlay = document.createElement('div');
+  overlay.className = 'move-overlay';
+  overlay.id = 'moveOverlay';
+  let items = '';
+  CAT_ORDER.filter(c=>S.players[c]).forEach(c=>{
+    const isCurrent = c===cat;
+    items+=`<div class="move-cat-item${isCurrent?' current':''}" onclick="${isCurrent?'':'closeMoveSheet();movePlayerToCategory(\''+cat.replace(/'/g,"\\'")+'\',\''+name.replace(/'/g,"\\'")+'\',\''+c.replace(/'/g,"\\'")+'\')'}">
+      <span>${ICONS[c]||'👥'}</span>
+      <span>${esc(c)}</span>
+      ${isCurrent?'<span class="move-check">✓</span>':''}
+    </div>`;
+  });
+  overlay.innerHTML=`<div class="move-sheet">
+    <div class="move-handle"></div>
+    <div class="move-title">Move "${esc(name)}" to</div>
+    <div class="move-cat-list">${items}</div>
+  </div>`;
+  overlay.addEventListener('click', e=>{if(e.target===overlay)closeMoveSheet();});
+  document.body.appendChild(overlay);
+};
+
+window.closeMoveSheet = function(){
+  const el=document.getElementById('moveOverlay');
+  if(el) el.remove();
+};
 
 function renderContent(){
   const c=activeTab, pl=S.players[c]||[];
@@ -872,6 +910,7 @@ function pCard(cat,name,draggable=false){
       <div class="pcard-name">${esc(name)}</div>
     </div>
     <button class="rename-btn" onclick="startRename(this)" title="Rename">✏️</button>
+    <button class="move-btn" onclick="openMoveSheet('${sc}','${sn}')" title="Move to category">→</button>
     <button class="prof-btn" onclick="openProfile('${sc}','${sn}')">👤</button>
     <div class="pcard-btns">
       <button class="ptap tp" onclick="setP('${sc}','${sn}',true)"><div class="ptap-ic">✓</div><div>YES</div></button>
