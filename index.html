@@ -189,6 +189,7 @@ body{overflow:hidden}
 .edit-on .drag-handle{display:flex}
 .pcard.dragging{opacity:.4;border:2px dashed var(--gold)!important}
 .pcard.drag-over{border-top:2px solid var(--gold)!important}
+.ctab.drag-tab-over{border:2px solid var(--gold)!important;background:rgba(255,200,0,.12)!important}
 .bday-strip{margin:0 10px 8px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,rgba(255,180,0,.1),rgba(255,100,0,.08));border:1px solid rgba(255,200,0,.25)}
 .bday-strip-row{display:flex;align-items:center;gap:10px;padding:9px 13px;border-bottom:1px solid rgba(255,200,0,.1)}
 .bday-strip-row:last-child{border-bottom:none}
@@ -753,8 +754,49 @@ function buildCatTabs(){
     el.innerHTML=`<div class="ctab-name">${ICONS[c]||"👥"} ${c}</div>
       <div class="ctab-row"><span class="cp">${st.p}P</span><span class="ca">${st.a}A</span>${st.u>0?`<span class="cu">${st.u}?</span>`:""}</div>`;
     el.onclick=()=>{activeTab=c;buildCatTabs();renderContent();};
+    // Drop zone on category tab
+    el.ondragover=e=>{
+      if(!dragSrc.name) return;
+      e.preventDefault();
+      document.querySelectorAll('.ctab').forEach(t=>t.classList.remove('drag-tab-over'));
+      el.classList.add('drag-tab-over');
+    };
+    el.ondragleave=()=>el.classList.remove('drag-tab-over');
+    el.ondrop=e=>{
+      e.preventDefault();
+      el.classList.remove('drag-tab-over');
+      if(!dragSrc.name||dragSrc.cat===c) return;
+      movePlayerToCategory(dragSrc.cat, dragSrc.name, c);
+    };
     bar.appendChild(el);
   });
+}
+
+function movePlayerToCategory(fromCat, name, toCat){
+  const src=S.players[fromCat]||[];
+  const idx=src.indexOf(name);
+  if(idx===-1) return;
+  src.splice(idx,1);
+  if(!S.players[toCat]) S.players[toCat]=[];
+  S.players[toCat].push(name);
+  // Move attendance data
+  Object.keys(S.att||{}).forEach(d=>{
+    if(!S.att[d]) return;
+    if(!S.att[d][toCat]) S.att[d][toCat]={};
+    if(S.att[d][fromCat]&&name in S.att[d][fromCat]){
+      S.att[d][toCat][name]=S.att[d][fromCat][name];
+      delete S.att[d][fromCat][name];
+    }
+  });
+  // Move profile
+  if(S.profiles){
+    const ok=fromCat+'::'+name, nk=toCat+'::'+name;
+    if(S.profiles[ok]){S.profiles[nk]=S.profiles[ok];delete S.profiles[ok];}
+  }
+  activeTab=toCat;
+  debounceSave();
+  buildCatTabs(); renderContent(); updateGrandStats();
+  toast('✅ '+name+' moved to '+toCat);
 }
 
 function renderContent(){
