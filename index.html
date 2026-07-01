@@ -177,6 +177,14 @@ body{overflow:hidden}
 .search-wrap{padding:8px 10px 4px;max-width:600px;margin:0 auto}
 .search-inp{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;padding:10px 14px 10px 36px;font-family:var(--fb);outline:none;box-sizing:border-box;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='rgba(255,255,255,0.3)' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center}
 .search-inp:focus{border-color:rgba(255,255,255,.25)}
+.search-suggest{position:absolute;top:100%;left:0;right:0;background:#1a2540;border:1px solid var(--border);border-radius:12px;margin-top:4px;z-index:200;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.search-suggest-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05)}
+.search-suggest-item:last-child{border-bottom:none}
+.search-suggest-item:active{background:rgba(255,255,255,.08)}
+.search-suggest-av{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--muted);flex-shrink:0}
+.search-suggest-name{font-size:13px;font-weight:600;color:#fff;flex:1}
+.search-suggest-cat{font-size:10px;color:var(--muted)}
+.search-wrap{position:relative}
 .search-result-cat{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px 4px}
 
 /* NAME EDIT INLINE */
@@ -424,7 +432,8 @@ body{overflow:hidden}
     <div id="installBannerWrap"></div>
     <div id="bdayStrip"></div>
     <div class="search-wrap">
-      <input class="search-inp" id="searchInp" placeholder="Search players..." oninput="onSearch(this.value)" autocomplete="off">
+      <input class="search-inp" id="searchInp" placeholder="Search players..." oninput="onSearch(this.value)" autocomplete="off" onfocus="onSearch(this.value)" onblur="setTimeout(()=>hideSuggest(),200)">
+      <div id="searchSuggest" class="search-suggest" style="display:none"></div>
     </div>
     <div id="searchResults" style="display:none"></div>
     <div id="attMain">
@@ -910,7 +919,6 @@ function pCard(cat,name,draggable=false){
       <div class="pcard-name">${esc(name)}</div>
     </div>
     <button class="rename-btn" onclick="startRename(this)" title="Rename">✏️</button>
-    <button class="move-btn" onclick="openMoveSheet('${sc}','${sn}')" title="Move to category">→</button>
     <button class="prof-btn" onclick="openProfile('${sc}','${sn}')">👤</button>
     <div class="pcard-btns">
       <button class="ptap tp" onclick="setP('${sc}','${sn}',true)"><div class="ptap-ic">✓</div><div>YES</div></button>
@@ -1022,8 +1030,42 @@ window.toggleEdit = function(){
 window.onSearch = function(q){
   const sr=document.getElementById('searchResults');
   const am=document.getElementById('attMain');
+  const sg=document.getElementById('searchSuggest');
   q=q.trim().toUpperCase();
-  if(!q){sr.style.display='none';am.style.display='';return;}
+
+  if(!q){
+    sr.style.display='none';
+    am.style.display='';
+    sg.style.display='none';
+    return;
+  }
+
+  // Suggestions dropdown
+  let suggestions=[];
+  CAT_ORDER.filter(c=>S.players[c]).forEach(c=>{
+    (S.players[c]||[]).filter(n=>n.toUpperCase().includes(q)).forEach(n=>{
+      suggestions.push({name:n,cat:c});
+    });
+  });
+
+  if(suggestions.length){
+    let sh='';
+    suggestions.slice(0,6).forEach(({name,cat})=>{
+      sh+=`<div class="search-suggest-item" onmousedown="selectSuggest('${cat.replace(/'/g,"\\'")}','${name.replace(/'/g,"\\'")}')">
+        <div class="search-suggest-av">${ini(name)}</div>
+        <div>
+          <div class="search-suggest-name">${esc(name)}</div>
+          <div class="search-suggest-cat">${ICONS[cat]||'👥'} ${esc(cat)}</div>
+        </div>
+      </div>`;
+    });
+    sg.innerHTML=sh;
+    sg.style.display='';
+  } else {
+    sg.style.display='none';
+  }
+
+  // Full results
   am.style.display='none'; sr.style.display='';
   let h='<div class="content">';
   let found=0;
@@ -1036,6 +1078,34 @@ window.onSearch = function(q){
   if(!found) h+=`<div class="hist-empty"><div class="he-ic">🔍</div>No players found.</div>`;
   h+='</div>';
   sr.innerHTML=h;
+};
+
+window.hideSuggest=function(){
+  const sg=document.getElementById('searchSuggest');
+  if(sg) sg.style.display='none';
+};
+
+window.selectSuggest=function(cat,name){
+  const inp=document.getElementById('searchInp');
+  if(inp) inp.value=name;
+  hideSuggest();
+  // Switch to that category
+  activeTab=cat;
+  document.getElementById('searchResults').style.display='none';
+  document.getElementById('attMain').style.display='';
+  document.getElementById('searchInp').value='';
+  buildCatTabs(); renderContent();
+  // Highlight the player briefly
+  setTimeout(()=>{
+    const cards=document.querySelectorAll('.pcard');
+    cards.forEach(c=>{
+      if(c.dataset.name===name){
+        c.scrollIntoView({behavior:'smooth',block:'center'});
+        c.style.boxShadow='0 0 0 2px var(--gold)';
+        setTimeout(()=>c.style.boxShadow='',1500);
+      }
+    });
+  },300);
 };
 
 // ── RENAME ──────────────────────────────
@@ -1084,10 +1154,13 @@ window.dragStart=function(e,cat,name){
   dragSrc={cat,name};
   setTimeout(()=>e.currentTarget.classList.add('dragging'),0);
   e.dataTransfer.effectAllowed='move';
+  document.body.style.overflow='hidden';
 };
 window.dragEnd=function(e){
   e.currentTarget.classList.remove('dragging');
   document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('drag-over'));
+  document.body.style.overflow='';
+  dragSrc={cat:null,name:null};
 };
 window.dragOver=function(e){
   e.preventDefault();
