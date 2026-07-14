@@ -958,7 +958,8 @@ window.openProfile=function(cat,name){
       <div class="profile-field"><div class="profile-label">Date of Birth</div><input class="profile-input" id="pf_dob" type="date" value="${esc(prof.dob||"")}"></div>
       <div class="profile-field"><div class="profile-label">Phone Number 1</div><input class="profile-input" id="pf_phone1" type="tel" value="${esc(prof.phone1||"")}" placeholder="Parent / Guardian 1"></div>
       <div class="profile-field"><div class="profile-label">Phone Number 2</div><input class="profile-input" id="pf_phone2" type="tel" value="${esc(prof.phone2||"")}" placeholder="Parent / Guardian 2"></div>
-      <div class="profile-field"><div class="profile-label">Pickup Person</div><input class="profile-input" id="pf_pickup" value="${esc(prof.pickup||"")}" placeholder="Who picks up the player?"></div>`;
+      <div class="profile-field"><div class="profile-label">Pickup Person</div><input class="profile-input" id="pf_pickup" value="${esc(prof.pickup||"")}" placeholder="Who picks up the player?"></div>
+      <div class="profile-field"><div class="profile-label">🏥 Health Condition</div><textarea class="profile-input" id="pf_health" rows="3" placeholder="Any medical conditions, allergies, injuries...">${esc(prof.health||"")}</textarea></div>`;
   }
   const overlay=document.createElement("div");
   overlay.className="profile-overlay";
@@ -987,6 +988,7 @@ window.saveProfileModal=function(cat,name){
     data.phone1=document.getElementById("pf_phone1")?document.getElementById("pf_phone1").value:"";
     data.phone2=document.getElementById("pf_phone2")?document.getElementById("pf_phone2").value:"";
     data.pickup=document.getElementById("pf_pickup")?document.getElementById("pf_pickup").value:"";
+    data.health=document.getElementById("pf_health")?document.getElementById("pf_health").value:"";
   }
   saveProfile(cat,name,data);
   closeProfile();
