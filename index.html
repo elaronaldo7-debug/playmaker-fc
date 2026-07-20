@@ -1305,6 +1305,7 @@ window.confirmDel = function(){
   const{cat,name}=delTarget;
   S.players[cat]=(S.players[cat]||[]).filter(n=>n!==name);
   Object.keys(S.att).forEach(d=>{if(S.att[d]?.[cat])delete S.att[d][cat][name];});
+  if(S.profiles){ delete S.profiles[cat+"::"+name]; }
   hideModal("delModal");_refresh();debounceSave();toast("🗑 Removed!");delTarget=null;
 };
 
@@ -1412,9 +1413,10 @@ function checkBirthdays(){
   Object.keys(S.profiles).forEach(key=>{
     const prof = S.profiles[key];
     if(!prof||!prof.dob) return;
+    const[cat,name] = key.split('::');
+    if(!(S.players[cat]||[]).includes(name)) return; // player removed — skip stale profile
     const parts = prof.dob.split('-');
     const mm=parts[1], dd=parts[2];
-    const[cat,name] = key.split('::');
     const age = today.getFullYear() - parseInt(parts[0]);
     if(mm===todayMM && dd===todayDD){
       birthdays.push({name,cat,when:'today',age});
@@ -1806,8 +1808,9 @@ function getBirthdaysForExport(){
   Object.keys(S.profiles).forEach(key=>{
     const p=S.profiles[key];
     if(!p||!p.dob) return;
-    const[yr,mm,dd]=p.dob.split('-');
     const[cat,name]=key.split('::');
+    if(!(S.players[cat]||[]).includes(name)) return; // player removed — skip stale profile
+    const[yr,mm,dd]=p.dob.split('-');
     const age=today.getFullYear()-parseInt(yr);
     if(mm===tMM&&dd===tDD) res.today.push({name,cat,age});
     else if(mm===rMM&&dd===rDD) res.tomorrow.push({name,cat,age:age+1});
