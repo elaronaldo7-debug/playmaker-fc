@@ -670,7 +670,7 @@ function startFirebaseListener() {
     }
     setSyncOk();
     if (!document.getElementById("appScreen").classList.contains("hidden")) {
-      buildCatTabs(); renderContent(); updateGrandStats();
+      buildCatTabs(); renderContent(); updateGrandStats(); renderBdayStrip();
       if (curPage === "hist") renderHistory();
       if (curPage === "rep") renderReport();
     }
@@ -1071,6 +1071,7 @@ window.saveProfileModal=function(cat,name){
     data.health=document.getElementById("pf_health")?document.getElementById("pf_health").value:"";
   }
   saveProfile(cat,name,data);
+  renderBdayStrip();
   closeProfile();
   toast("✅ Profile saved!");
 };
