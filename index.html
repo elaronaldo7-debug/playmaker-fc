@@ -1027,6 +1027,7 @@ window.openProfile=function(cat,name){
   let fields="";
   if(isCoach){
     fields=`
+      <div class="profile-field"><div class="profile-label">Date of Birth</div><input class="profile-input" id="pf_dob" type="date" ${ro} value="${esc(prof.dob||"")}"></div>
       <div class="profile-field"><div class="profile-label">Bio</div><textarea class="profile-input" id="pf_bio" rows="3" ${ro} placeholder="Coach bio...">${esc(prof.bio||"")}</textarea></div>
       <div class="profile-field"><div class="profile-label">Achievements</div><textarea class="profile-input" id="pf_ach" rows="3" ${ro} placeholder="Coaching achievements...">${esc(prof.achievements||"")}</textarea></div>`;
   } else {
@@ -1058,6 +1059,7 @@ window.saveProfileModal=function(cat,name){
   const isCoach=(cat==="COACHES");
   let data={};
   if(isCoach){
+    data.dob=document.getElementById("pf_dob")?document.getElementById("pf_dob").value:"";
     data.bio=document.getElementById("pf_bio")?document.getElementById("pf_bio").value:"";
     data.achievements=document.getElementById("pf_ach")?document.getElementById("pf_ach").value:"";
   } else {
