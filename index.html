@@ -687,7 +687,7 @@ async function saveToFirebase() {
   setTimeout(() => { isWriting = false; }, 1000);
 }
 
-function debounceSave() { setSyncing(); clearTimeout(saveT); saveT = setTimeout(saveToFirebase, 600); }
+function debounceSave() { isWriting = true; setSyncing(); clearTimeout(saveT); saveT = setTimeout(saveToFirebase, 600); }
 
 function setSyncOk(){ document.getElementById("syncDot").className="sync-dot"; document.getElementById("syncLbl").innerHTML='<strong>🟢 Live</strong>'; }
 function setSyncing(){ document.getElementById("syncDot").className="sync-dot saving"; document.getElementById("syncLbl").innerHTML='<strong>Saving...</strong>'; }
@@ -1112,6 +1112,15 @@ window.toggleEdit = function(){
 };
 
 // ── SEARCH ──────────────────────────────
+function matchesSearch(cat,name,q){
+  if(name.toUpperCase().includes(q)) return true;
+  if(/^\d+$/.test(q)){ // numeric query — also match by birth year (e.g. "2015")
+    const prof=getProfile(cat,name);
+    if(prof&&prof.dob&&prof.dob.slice(0,4)===q) return true;
+  }
+  return false;
+}
+
 window.onSearch = function(q){
   const sr=document.getElementById('searchResults');
   const am=document.getElementById('attMain');
@@ -1128,7 +1137,7 @@ window.onSearch = function(q){
   // Suggestions dropdown
   let suggestions=[];
   CAT_ORDER.filter(c=>S.players[c]).forEach(c=>{
-    (S.players[c]||[]).filter(n=>n.toUpperCase().includes(q)).forEach(n=>{
+    (S.players[c]||[]).filter(n=>matchesSearch(c,n,q)).forEach(n=>{
       suggestions.push({name:n,cat:c});
     });
   });
@@ -1154,11 +1163,23 @@ window.onSearch = function(q){
   am.style.display='none'; sr.style.display='';
   let h='<div class="content">';
   let found=0;
+  const isYearSearch=/^\d+$/.test(q);
   CAT_ORDER.filter(c=>S.players[c]).forEach(c=>{
-    const matches=(S.players[c]||[]).filter(n=>n.toUpperCase().includes(q));
+    const matches=(S.players[c]||[]).filter(n=>matchesSearch(c,n,q));
     if(!matches.length) return;
     h+=`<div class="search-result-cat">${ICONS[c]||'👥'} ${c}</div>`;
-    matches.forEach(n=>{h+=pCard(c,n);found++;});
+    matches.forEach(n=>{
+      found++;
+      h+=`<div style="display:flex;align-items:flex-start;gap:8px">
+        <div style="flex-shrink:0;width:22px;padding-top:14px;text-align:right;font-size:12px;color:var(--muted)">${found}.</div>
+        <div style="flex:1;min-width:0">`;
+      h+=pCard(c,n,false,canEditCat(c));
+      if(isYearSearch){
+        const prof=getProfile(c,n);
+        if(prof&&prof.dob) h+=`<div style="font-size:11px;color:var(--muted);margin:-6px 0 8px 44px">🎂 Born ${esc(prof.dob)}</div>`;
+      }
+      h+=`</div></div>`;
+    });
   });
   if(!found) h+=`<div class="hist-empty"><div class="he-ic">🔍</div>No players found.</div>`;
   h+='</div>';
