@@ -1,0 +1,25 @@
+{
+  "name": "Playmaker FC Parent",
+  "short_name": "PM Parent",
+  "description": "Playmaker FC Parent Portal - Track your child's attendance",
+  "start_url": "/playmaker-fc/parent.html",
+  "scope": "/playmaker-fc/parent.html",
+  "display": "standalone",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/playmaker-fc/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/playmaker-fc/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
