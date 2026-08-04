@@ -413,6 +413,7 @@ body{overflow:hidden}
       </div>
       <div class="hdr-right">
         <button class="hbtn" onclick="showModal('expModal')">📤 Export</button>
+        <button class="hbtn" onclick="openNewsModal()">📢 News</button>
         <button class="hbtn danger" onclick="doLogout()">Exit</button>
       </div>
     </div>
@@ -486,6 +487,33 @@ body{overflow:hidden}
 </div>
 
 <!-- EXPORT MODAL -->
+<div class="overlay" id="newsModal" onclick="if(event.target===this)hideModal('newsModal')">
+  <div class="modal">
+    <div class="modal-t">📢 Post Announcement</div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Emoji</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="📢" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px;background:rgba(255,255,255,.1)">📢</span>
+        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="🏆" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">🏆</span>
+        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="⚽" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">⚽</span>
+        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="📅" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">📅</span>
+        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="⚠️" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">⚠️</span>
+        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="🎉" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">🎉</span>
+        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="💪" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">💪</span>
+        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="ℹ️" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">ℹ️</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Title</div>
+      <input id="newsTitle" style="width:100%;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;padding:10px 12px;font-family:var(--fb);outline:none;box-sizing:border-box;margin-bottom:10px" placeholder="e.g. Training cancelled Sunday">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Message</div>
+      <textarea id="newsBody" rows="3" style="width:100%;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;padding:10px 12px;font-family:var(--fb);outline:none;box-sizing:border-box;resize:vertical" placeholder="Details..."></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn s" onclick="postNews()">📢 Post</button>
+      <button class="mbtn c" onclick="hideModal('newsModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="expModal" onclick="if(event.target===this)hideModal('expModal')">
   <div class="modal">
     <div class="modal-t">📤 Export Attendance</div>
@@ -569,7 +597,7 @@ const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","BASIC 3":"⚽","U7":"🌱","U9":"�
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
-let S = { players:{}, att:{}, notes:{}, profiles:{} };
+let S = { players:{}, att:{}, notes:{}, profiles:{}, news_feed:{} };
 let activeTab = "COACHES";
 let curDate = todayStr();
 let editMode = false;
@@ -666,6 +694,7 @@ function startFirebaseListener() {
     if (remote && remote.players) {
       S = remote;
       if(!S.profiles) S.profiles={};
+      if(!S.news_feed) S.news_feed={};
       ensureDefaults();
     }
     setSyncOk();
@@ -1884,6 +1913,33 @@ function init(){
   // whether a coach is already signed in (persistent session) or not.
 }
 init();
+// ── NEWS ──────────────────────────────────────────
+window.openNewsModal = function(){
+  document.getElementById('newsTitle').value='';
+  document.getElementById('newsBody').value='';
+  document.querySelectorAll('.news-emoji-pick').forEach(e=>e.style.background='');
+  document.querySelector('.news-emoji-pick').style.background='rgba(255,255,255,.1)';
+  showModal('newsModal');
+};
+
+window.pickEmoji = function(el){
+  document.querySelectorAll('.news-emoji-pick').forEach(e=>e.style.background='');
+  el.style.background='rgba(255,255,255,.15)';
+};
+
+window.postNews = function(){
+  const title = document.getElementById('newsTitle').value.trim();
+  const body  = document.getElementById('newsBody').value.trim();
+  if(!title){ toast('Please enter a title!'); return; }
+  const sel = document.querySelector('.news-emoji-pick[style*="rgba(255,255,255,.15"]');
+  const emoji = sel ? sel.dataset.e : '📢';
+  if(!S.news_feed) S.news_feed={};
+  S.news_feed['n_'+Date.now()] = { title, body, emoji, ts: Date.now() };
+  debounceSave();
+  hideModal('newsModal');
+  toast('📢 Announcement posted!');
+};
+
 </script>
 </body>
 </html>

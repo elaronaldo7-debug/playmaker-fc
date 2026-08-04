@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Playmaker FC — Parent</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a1628;--card:#0f1e35;--border:rgba(255,255,255,.1);
+  --text:#e8eaf6;--muted:rgba(255,255,255,.45);
+  --red:#e53935;--green:#43a047;--gold:#f9a825;--blue:#1976d2;
+  --fb:'Segoe UI',sans-serif;--fh:'Segoe UI',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh}
+.screen.on{display:flex;flex-direction:column}
+
+/* LOGIN */
+#loginScreen{align-items:center;justify-content:center;padding:24px;
+  background:linear-gradient(160deg,#0a1628,#0f2040 50%,#1a1020)}
+.login-logo{width:100px;height:100px;border-radius:22px;margin-bottom:16px;object-fit:cover}
+.login-title{font-size:28px;font-weight:900;color:#fff;letter-spacing:.04em;text-align:center}
+.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:32px;margin-top:4px}
+.login-box{width:100%;max-width:380px;background:rgba(255,255,255,.06);
+  border:1px solid var(--border);border-radius:18px;padding:24px}
+.login-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.login-inp{width:100%;background:rgba(255,255,255,.08);border:1px solid var(--border);
+  border-radius:12px;color:var(--text);font-size:18px;padding:14px 16px;
+  font-family:var(--fb);outline:none;letter-spacing:.04em}
+.login-inp:focus{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)}
+.login-btn{width:100%;padding:16px;border-radius:12px;border:none;margin-top:14px;
+  background:linear-gradient(135deg,var(--blue),var(--red));
+  color:#fff;font-family:var(--fh);font-size:18px;font-weight:700;cursor:pointer}
+.login-err{font-size:12px;color:#ef9a9a;text-align:center;margin-top:10px;min-height:18px}
+
+/* APP SCREEN */
+#appScreen{background:var(--bg)}
+.app-hdr{background:var(--card);padding:14px 16px 12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.hdr-logo{width:36px;height:36px;border-radius:9px;object-fit:cover;flex-shrink:0}
+.hdr-info{flex:1}
+.hdr-title{font-size:16px;font-weight:800;color:#fff}
+.hdr-sub{font-size:11px;color:var(--muted)}
+.hdr-logout{background:rgba(255,255,255,.08);border:1px solid var(--border);
+  border-radius:8px;padding:6px 12px;color:var(--muted);font-size:12px;cursor:pointer;
+  font-family:var(--fb)}
+
+/* CHILD CARD */
+.child-card{margin:16px;background:linear-gradient(135deg,#1a2a4a,#0f1e35);
+  border:1px solid var(--border);border-radius:18px;padding:18px;
+  display:flex;align-items:center;gap:14px}
+.child-av{width:54px;height:54px;border-radius:14px;
+  background:linear-gradient(135deg,var(--blue),var(--red));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:900;color:#fff;flex-shrink:0}
+.child-name{font-size:20px;font-weight:800;color:#fff}
+.child-cat{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 16px 16px}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 10px;text-align:center}
+.stat-num{font-size:24px;font-weight:800;color:#fff}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+
+/* MONTH PICKER */
+.month-wrap{margin:0 16px 14px;display:flex;align-items:center;gap:10px}
+.month-inp{flex:1;background:var(--card);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);font-size:14px;padding:10px 14px;
+  font-family:var(--fb);outline:none}
+.month-lbl{font-size:12px;color:var(--muted);font-weight:600}
+
+/* ATTENDANCE LIST */
+.att-section{margin:0 16px}
+.att-month-title{font-size:13px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.att-item{display:flex;align-items:center;gap:12px;padding:11px 14px;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
+.att-date{flex:1}
+.att-day{font-size:13px;font-weight:700;color:#fff}
+.att-full{font-size:10px;color:var(--muted);margin-top:1px}
+.att-badge{font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px}
+.att-badge.p{background:rgba(67,160,71,.2);color:#81c784}
+.att-badge.a{background:rgba(229,57,53,.2);color:#ef9a9a}
+.att-badge.n{background:rgba(255,255,255,.08);color:rgba(255,255,255,.4)}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-ic{font-size:40px;margin-bottom:10px}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);
+  border-top:1px solid var(--border);display:flex;z-index:100}
+.nav-btn{flex:1;padding:10px 0 14px;display:flex;flex-direction:column;
+  align-items:center;gap:4px;border:none;background:none;
+  color:var(--muted);cursor:pointer;font-family:var(--fb)}
+.nav-btn.on{color:#fff}
+.nav-btn-ic{font-size:22px}
+.nav-btn-lbl{font-size:10px;font-weight:600;letter-spacing:.04em}
+.page-content{padding-bottom:80px}
+
+/* NEWS */
+.news-card{margin:0 16px 12px;background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:16px;position:relative;overflow:hidden}
+.news-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:linear-gradient(180deg,var(--blue),var(--red))}
+.news-emoji{font-size:22px;margin-bottom:6px}
+.news-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:6px}
+.news-body{font-size:13px;color:rgba(255,255,255,.75);line-height:1.5}
+.news-time{font-size:10px;color:var(--muted);margin-top:8px}
+.news-section-title{font-size:12px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.07em;margin:16px 16px 10px}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+  background:#222;color:#fff;padding:10px 20px;border-radius:20px;
+  font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;
+  flex:1;flex-direction:column;gap:12px;color:var(--muted);font-size:14px}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.1);
+  border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen on" id="loginScreen">
+  <img class="login-logo" src="icon-192x192.png" onerror="this.style.display='none'">
+  <div class="login-title">PLAYMAKER FC</div>
+  <div class="login-sub">Parent Portal</div>
+  <div class="login-box">
+    <div class="login-label">Phone Number</div>
+    <input class="login-inp" id="phoneInp" type="tel" placeholder="Enter your phone number"
+      inputmode="numeric" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">View My Child's Attendance</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="screen" id="appScreen">
+  <div class="app-hdr">
+    <img class="hdr-logo" src="icon-192x192.png" onerror="this.style.display='none'">
+    <div class="hdr-info">
+      <div class="hdr-title">PLAYMAKER FC</div>
+      <div class="hdr-sub" id="hdrSub">Parent Portal</div>
+    </div>
+    <button class="hdr-logout" onclick="doLogout()">Exit</button>
+  </div>
+  <div id="attPage" class="page-content">
+    <div class="loading"><div class="spinner"></div>Loading...</div>
+  </div>
+  <div id="newsPage" class="page-content" style="display:none">
+    <div id="newsFeed"><div class="loading"><div class="spinner"></div>Loading news...</div></div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn on" id="navAtt" onclick="switchTab('att')">
+      <div class="nav-btn-ic">📋</div>
+      <div class="nav-btn-lbl">ATTENDANCE</div>
+    </button>
+    <button class="nav-btn" id="navNews" onclick="switchTab('news')">
+      <div class="nav-btn-ic">📢</div>
+      <div class="nav-btn-lbl">NEWS</div>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  databaseURL: "https://playmaker-fc-59338-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const dbRef = ref(db, 'attendance_data');
+
+let S = {};
+let currentChild = null; // {name, cat, phone}
+
+// Load Firebase data
+onValue(dbRef, (snap) => {
+  const d = snap.val();
+  if (d) S = d;
+}, () => {});
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('on'); });
+  document.getElementById(id).classList.add('on');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function ini(name) {
+  const parts = name.trim().split(' ');
+  return parts.length >= 2 ? parts[0][0] + parts[1][0] : parts[0].slice(0,2);
+}
+
+function fmtDate(d) {
+  const dt = new Date(d + 'T00:00:00');
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return {
+    dow: days[dt.getDay()],
+    day: dt.getDate(),
+    mon: months[dt.getMonth()],
+    full: `${days[dt.getDay()]}, ${dt.getDate()} ${months[dt.getMonth()]}`
+  };
+}
+
+function todayStr() {
+  return new Date().toISOString().slice(0,10);
+}
+
+// ── TAB SWITCH ──────────────────────────────────────
+window.switchTab = function(tab) {
+  document.getElementById('attPage').style.display = tab==='att' ? '' : 'none';
+  document.getElementById('newsPage').style.display = tab==='news' ? '' : 'none';
+  document.getElementById('navAtt').classList.toggle('on', tab==='att');
+  document.getElementById('navNews').classList.toggle('on', tab==='news');
+  if (tab==='news') renderNews();
+};
+
+// ── LOGIN ──────────────────────────────────────────
+window.doLogin = function() {
+  const phone = document.getElementById('phoneInp').value.trim().replace(/\s/g,'');
+  const errEl = document.getElementById('loginErr');
+  errEl.textContent = '';
+
+  if (!phone || phone.length < 8) {
+    errEl.textContent = 'Please enter a valid phone number.';
+    return;
+  }
+
+  const profiles = S.profiles || {};
+  let found = null;
+  for (const key of Object.keys(profiles)) {
+    const prof = profiles[key];
+    const p1 = (prof.phone1 || '').replace(/\s/g,'');
+    const p2 = (prof.phone2 || '').replace(/\s/g,'');
+    if (p1 === phone || p2 === phone) {
+      const [cat, name] = key.split('::');
+      found = { name, cat, phone };
+      break;
+    }
+  }
+
+  if (!found) {
+    errEl.textContent = 'Phone number not found. Please contact your coach.';
+    return;
+  }
+
+  currentChild = found;
+  sessionStorage.setItem('pmParentChild', JSON.stringify(found));
+  showScreen('appScreen');
+  renderApp();
+};
+
+window.doLogout = function() {
+  currentChild = null;
+  sessionStorage.removeItem('pmParentChild');
+  document.getElementById('phoneInp').value = '';
+  document.getElementById('loginErr').textContent = '';
+  showScreen('loginScreen');
+};
+
+// ── RENDER ATTENDANCE ──────────────────────────────────────
+function renderApp() {
+  if (!currentChild) return;
+  const { name, cat } = currentChild;
+  document.getElementById('hdrSub').textContent = `Parent Portal · ${cat}`;
+  const curMonth = todayStr().slice(0,7);
+  renderContent(curMonth);
+}
+
+function renderContent(month) {
+  const { name, cat } = currentChild;
+  const att = S.att || {};
+  const monthDates = Object.keys(att).filter(d => d.startsWith(month)).sort();
+  const allDates = Object.keys(att).sort();
+
+  let mPresent = 0, mAbsent = 0, mTotal = 0;
+  for (const d of monthDates) {
+    const val = att[d]?.[cat]?.[name];
+    if (val === true) { mPresent++; mTotal++; }
+    else if (val === false) { mAbsent++; mTotal++; }
+  }
+  const mPct = mTotal ? Math.round(mPresent/mTotal*100) : 0;
+
+  let oPresent = 0, oAbsent = 0;
+  for (const d of allDates) {
+    const val = att[d]?.[cat]?.[name];
+    if (val === true) oPresent++;
+    else if (val === false) oAbsent++;
+  }
+  const oTotal = oPresent + oAbsent;
+  const oPct = oTotal ? Math.round(oPresent/oTotal*100) : 0;
+
+  let attItems = '';
+  if (monthDates.length === 0) {
+    attItems = `<div class="empty"><div class="empty-ic">📅</div>No sessions recorded this month.</div>`;
+  } else {
+    [...monthDates].reverse().forEach(d => {
+      const val = att[d]?.[cat]?.[name];
+      const fd = fmtDate(d);
+      let badge, label;
+      if (val === true) { badge = 'p'; label = '✓ Present'; }
+      else if (val === false) { badge = 'a'; label = '✕ Absent'; }
+      else { badge = 'n'; label = '— Not marked'; }
+      attItems += `<div class="att-item">
+        <div class="att-date"><div class="att-day">${fd.full}</div></div>
+        <div class="att-badge ${badge}">${label}</div>
+      </div>`;
+    });
+  }
+
+  const [yr, mn] = month.split('-');
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthName = `${monthNames[parseInt(mn)-1]} ${yr}`;
+
+  document.getElementById('attPage').innerHTML = `
+    <div class="child-card">
+      <div class="child-av">${ini(name)}</div>
+      <div>
+        <div class="child-name">${name}</div>
+        <div class="child-cat">${cat}</div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" style="color:#81c784">${oPresent}</div>
+        <div class="stat-lbl">Total Present</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="color:#ef9a9a">${oAbsent}</div>
+        <div class="stat-lbl">Total Absent</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" style="color:${oPct>=75?'#81c784':oPct>=50?'#ffd54f':'#ef9a9a'}">${oPct}%</div>
+        <div class="stat-lbl">Overall</div>
+      </div>
+    </div>
+    <div class="month-wrap">
+      <span class="month-lbl">Month:</span>
+      <input class="month-inp" type="month" id="monthInp" value="${month}" onchange="changeMonth(this.value)">
+    </div>
+    <div class="att-section">
+      <div class="att-month-title">${monthName} — ${mPresent}/${mTotal} sessions (${mPct}%)</div>
+      ${attItems}
+    </div>
+    <div style="height:32px"></div>
+  `;
+}
+
+window.changeMonth = function(m) { renderContent(m); };
+
+// ── NEWS FEED ──────────────────────────────────────
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff/60000);
+  const hrs  = Math.floor(diff/3600000);
+  const days = Math.floor(diff/86400000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  if (hrs < 24) return `${hrs}h ago`;
+  if (days === 1) return 'Yesterday';
+  return `${days} days ago`;
+}
+
+function renderNews() {
+  const news = S.news_feed || {};
+  const items = Object.entries(news).sort((a,b) => b[1].ts - a[1].ts);
+  const feed = document.getElementById('newsFeed');
+
+  if (!items.length) {
+    feed.innerHTML = `<div class="empty" style="margin-top:40px">
+      <div class="empty-ic">📢</div>
+      <div>No announcements yet.</div>
+    </div>`;
+    return;
+  }
+
+  let h = '<div class="news-section-title">📢 Announcements</div>';
+  items.forEach(([id, item]) => {
+    h += `<div class="news-card">
+      <div class="news-emoji">${item.emoji || '📢'}</div>
+      <div class="news-title">${esc(item.title)}</div>
+      <div class="news-body">${esc(item.body)}</div>
+      <div class="news-time">${timeAgo(item.ts)}</div>
+    </div>`;
+  });
+  h += '<div style="height:32px"></div>';
+  feed.innerHTML = h;
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── AUTO LOGIN ──────────────────────────────────────
+const saved = sessionStorage.getItem('pmParentChild');
+if (saved) {
+  currentChild = JSON.parse(saved);
+  showScreen('appScreen');
+  setTimeout(() => renderApp(), 1500);
+}
+</script>
+</body>
+</html>
