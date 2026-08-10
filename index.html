@@ -413,7 +413,6 @@ body{overflow:hidden}
       </div>
       <div class="hdr-right">
         <button class="hbtn" onclick="showModal('expModal')">📤 Export</button>
-        <button class="hbtn" onclick="openNewsModal()">📢 News</button>
         <button class="hbtn danger" onclick="doLogout()">Exit</button>
       </div>
     </div>
@@ -487,33 +486,6 @@ body{overflow:hidden}
 </div>
 
 <!-- EXPORT MODAL -->
-<div class="overlay" id="newsModal" onclick="if(event.target===this)hideModal('newsModal')">
-  <div class="modal">
-    <div class="modal-t">📢 Post Announcement</div>
-    <div style="margin-bottom:10px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Emoji</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="📢" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px;background:rgba(255,255,255,.1)">📢</span>
-        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="🏆" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">🏆</span>
-        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="⚽" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">⚽</span>
-        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="📅" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">📅</span>
-        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="⚠️" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">⚠️</span>
-        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="🎉" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">🎉</span>
-        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="💪" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">💪</span>
-        <span class="news-emoji-pick" onclick="pickEmoji(this)" data-e="ℹ️" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px">ℹ️</span>
-      </div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Title</div>
-      <input id="newsTitle" style="width:100%;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;padding:10px 12px;font-family:var(--fb);outline:none;box-sizing:border-box;margin-bottom:10px" placeholder="e.g. Training cancelled Sunday">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Message</div>
-      <textarea id="newsBody" rows="3" style="width:100%;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;padding:10px 12px;font-family:var(--fb);outline:none;box-sizing:border-box;resize:vertical" placeholder="Details..."></textarea>
-    </div>
-    <div class="modal-btns">
-      <button class="mbtn s" onclick="postNews()">📢 Post</button>
-      <button class="mbtn c" onclick="hideModal('newsModal')">Cancel</button>
-    </div>
-  </div>
-</div>
-
 <div class="overlay" id="expModal" onclick="if(event.target===this)hideModal('expModal')">
   <div class="modal">
     <div class="modal-t">📤 Export Attendance</div>
@@ -569,7 +541,7 @@ const COACH_MAP = {
   "prasanna@playmakerfc.com": { role:"Admin", cat:null,     name:"Prasanna" },
   "dinesh@playmakerfc.com":   { role:"Coach", cat:"BASIC 1", name:"Dinesh" },
   "arup@playmakerfc.com":     { role:"Coach", cat:"BASIC 2", name:"Arup" },
-  "danush@playmakerfc.com":   { role:"Coach", cat:"BASIC 3", name:"Danush" },
+  "danush@playmakerfc.com":   { role:"Coach", cat:"KEEPER", name:"Danush" },
   "vicky@playmakerfc.com":    { role:"Coach", cat:"U9",      name:"Vicky" },
   "pugazh@playmakerfc.com":   { role:"Coach", cat:"U11",     name:"Pugazh" },
   "ela@playmakerfc.com":      { role:"Coach", cat:"U13",     name:"Ela" },
@@ -584,20 +556,20 @@ const DEFAULT_PLAYERS = {
   "COACHES":["ARUP","DINESH","ELA","MYCAL","PUGAZH","VICKY"],
   "BASIC 1":["AHIL KARTHIKEYAN","DHIYAN","DHEERAJ","SRI KRISHNA","PRASENNAJITH","HARASHAVARADHAN","ABIGAIL","NIGARTHTHANA","TEJESHVARAN","YUGAN","MITHRAN","MOGITHRAN","DHAKSHIN","MADHAV","SUJAN","AARON PHILIP","AARUSH ABHILASH","SAI KRISHNA","ARJUN","THANOOSH TEJA","ANUJ","ELAMBHAARATHI","SAKTHI DHARAN","KRISH","SIVA PRIYA","KOWSHIKA","PRANAV","INIDHA","ISHAAN","RITHUVA"],
   "BASIC 2":["SUGANANDARAJA","DEESHITHAN","RAHUL","RAGHAV","ABINOAM","GUHAN JAI","SHAZAN","ANISHWAR","AKSHITH","SAI CHARAN","VINISH","RAJA RAM","SENTHIL BALAJI","KISHAN","JANITH","MRUTHYUN","RAJA GOPAL","INIYAVAN","JASWIN SELLAN","NIVAN","SREEKAVAN"],
-  "BASIC 3":[],
+  "KEEPER":[],
   "U7":["SATHYADEV","SUGANESHWARAN","SIDDHARTH","MITHRA","CHATRESH","MISHANTH"],
   "U9":["CHIRAYU","EON","NIVED KRISHNA (ADHI)","SANJEEVAN","KRITHICK","RIVAAN","DAVID","KAVIN","PRANAV","AADHI"],
   "U11":["BHAVIN","ROGITHRAAJ","RITHEESH","ADHIDEV","DHARMENDRA","AKHILINIYAN","NITHILAN","THEEKSHA","LOHITH"],
   "U13":["MADHAV KRISH","SHRIJITH","MAKESH PRIYAN","KOVARSHAN","SARVESH VARA","DINESH RAJ","HEMA RAJ","CHRIS JONATHAN","ANAV DEEPAK","AIDEN","ALWIN JOEL"],
   "U15":["PRAKALATHAN","SANJAY","HEMNATH","SALAMON","PRADEEP (VISHAL)","ROHIT","BHARATH KUMAR","WIGGLES (VICKY)","HEMESH","ARAVIND","NAVEEN","MUHAYANTHU","EASWAR","STEPHAN","VEDANTT","SRIMAN","HARI"]
 };
-const CAT_ORDER = ["COACHES","BASIC 1","BASIC 2","BASIC 3","U7","U9","U11","U13","U15"];
-const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","BASIC 3":"⚽","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋"};
+const CAT_ORDER = ["COACHES","BASIC 1","BASIC 2","KEEPER","U7","U9","U11","U13","U15"];
+const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","KEEPER":"🧤","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋"};
 
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
-let S = { players:{}, att:{}, notes:{}, profiles:{}, news_feed:{} };
+let S = { players:{}, att:{}, notes:{}, profiles:{} };
 let activeTab = "COACHES";
 let curDate = todayStr();
 let editMode = false;
@@ -694,7 +666,6 @@ function startFirebaseListener() {
     if (remote && remote.players) {
       S = remote;
       if(!S.profiles) S.profiles={};
-      if(!S.news_feed) S.news_feed={};
       ensureDefaults();
     }
     setSyncOk();
@@ -723,9 +694,50 @@ function setSyncing(){ document.getElementById("syncDot").className="sync-dot sa
 function setSyncErr(){ document.getElementById("syncDot").className="sync-dot err"; document.getElementById("syncLbl").innerHTML='<strong>⚠️ Check internet</strong>'; }
 
 function ensureDefaults() {
+  migrateCategoryRename("BASIC 3","KEEPER");
   Object.keys(DEFAULT_PLAYERS).forEach(c=>{ if(!S.players[c]) S.players[c]=[...DEFAULT_PLAYERS[c]]; });
   if (!S.notes) S.notes = {};
   if (!S.att) S.att = {};
+}
+
+// One-time migration: renames a category everywhere in the data (roster, attendance,
+// profiles, notes) so existing data isn't lost when a category is renamed.
+function migrateCategoryRename(oldName, newName){
+  let changed=false;
+  if(S.players && S.players[oldName]){
+    S.players[newName]=[...(S.players[newName]||[]),...S.players[oldName]];
+    delete S.players[oldName];
+    changed=true;
+  }
+  if(S.att){
+    Object.keys(S.att).forEach(date=>{
+      if(S.att[date] && S.att[date][oldName]){
+        S.att[date][newName]={...(S.att[date][newName]||{}),...S.att[date][oldName]};
+        delete S.att[date][oldName];
+        changed=true;
+      }
+    });
+  }
+  if(S.notes){
+    Object.keys(S.notes).forEach(date=>{
+      if(S.notes[date] && S.notes[date][oldName]!==undefined){
+        if(S.notes[date][newName]===undefined) S.notes[date][newName]=S.notes[date][oldName];
+        delete S.notes[date][oldName];
+        changed=true;
+      }
+    });
+  }
+  if(S.profiles){
+    Object.keys(S.profiles).forEach(key=>{
+      if(key.startsWith(oldName+"::")){
+        const newKey=newName+"::"+key.slice((oldName+"::").length);
+        S.profiles[newKey]=S.profiles[key];
+        delete S.profiles[key];
+        changed=true;
+      }
+    });
+  }
+  if(changed) debounceSave();
 }
 
 // ═══════════════════════════════════════
@@ -1913,33 +1925,6 @@ function init(){
   // whether a coach is already signed in (persistent session) or not.
 }
 init();
-// ── NEWS ──────────────────────────────────────────
-window.openNewsModal = function(){
-  document.getElementById('newsTitle').value='';
-  document.getElementById('newsBody').value='';
-  document.querySelectorAll('.news-emoji-pick').forEach(e=>e.style.background='');
-  document.querySelector('.news-emoji-pick').style.background='rgba(255,255,255,.1)';
-  showModal('newsModal');
-};
-
-window.pickEmoji = function(el){
-  document.querySelectorAll('.news-emoji-pick').forEach(e=>e.style.background='');
-  el.style.background='rgba(255,255,255,.15)';
-};
-
-window.postNews = function(){
-  const title = document.getElementById('newsTitle').value.trim();
-  const body  = document.getElementById('newsBody').value.trim();
-  if(!title){ toast('Please enter a title!'); return; }
-  const sel = document.querySelector('.news-emoji-pick[style*="rgba(255,255,255,.15"]');
-  const emoji = sel ? sel.dataset.e : '📢';
-  if(!S.news_feed) S.news_feed={};
-  S.news_feed['n_'+Date.now()] = { title, body, emoji, ts: Date.now() };
-  debounceSave();
-  hideModal('newsModal');
-  toast('📢 Announcement posted!');
-};
-
 </script>
 </body>
 </html>
