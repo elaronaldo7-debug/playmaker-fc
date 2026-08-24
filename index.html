@@ -512,7 +512,7 @@ body{overflow:hidden}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -687,6 +687,30 @@ async function saveToFirebase() {
   setTimeout(() => { isWriting = false; }, 1000);
 }
 
+// Targeted multi-path save — only writes the specific fields that actually
+// changed (e.g. "att/2026-08-10/KEEPER/ADITYA") instead of the whole tree.
+// This is critical with multiple coaches editing different categories at the
+// same time: a full-tree `set()` from one coach can silently overwrite another
+// coach's just-made edit if the writes land close together. Per-path `update()`
+// calls are independent, so concurrent edits to different data never collide.
+let pendingUpdates = {};
+function queueUpdate(path, value) {
+  pendingUpdates[path] = value;
+  isWriting = true;
+  setSyncing();
+  clearTimeout(saveT);
+  saveT = setTimeout(flushUpdates, 600);
+}
+async function flushUpdates() {
+  const updates = pendingUpdates;
+  pendingUpdates = {};
+  if (!Object.keys(updates).length) { isWriting = false; return; }
+  try {
+    await update(dbRef, updates);
+    setSyncOk();
+  } catch(e) { setSyncErr(); }
+  setTimeout(() => { isWriting = false; }, 1000);
+}
 function debounceSave() { isWriting = true; setSyncing(); clearTimeout(saveT); saveT = setTimeout(saveToFirebase, 600); }
 
 function setSyncOk(){ document.getElementById("syncDot").className="sync-dot"; document.getElementById("syncLbl").innerHTML='<strong>🟢 Live</strong>'; }
@@ -695,18 +719,31 @@ function setSyncErr(){ document.getElementById("syncDot").className="sync-dot er
 
 function ensureDefaults() {
   migrateCategoryRename("BASIC 3","KEEPER");
-  Object.keys(DEFAULT_PLAYERS).forEach(c=>{ if(!S.players[c]) S.players[c]=[...DEFAULT_PLAYERS[c]]; });
+  // Only add category if it doesn't exist at all in Firebase
+  // Never overwrite existing player lists — Firebase is the source of truth
+  const hasAnyPlayers = Object.values(S.players||{}).some(arr => arr && arr.length > 0);
+  if (!hasAnyPlayers) {
+    // First time setup only
+    Object.keys(DEFAULT_PLAYERS).forEach(c => {
+      if (!S.players[c]) S.players[c] = [...DEFAULT_PLAYERS[c]];
+    });
+  }
   if (!S.notes) S.notes = {};
   if (!S.att) S.att = {};
 }
 
 // One-time migration: renames a category everywhere in the data (roster, attendance,
 // profiles, notes) so existing data isn't lost when a category is renamed.
+// Uses targeted multi-path updates (not a full-tree save) so it can't clobber
+// other coaches' concurrent, unrelated edits.
 function migrateCategoryRename(oldName, newName){
+  const updates={};
   let changed=false;
   if(S.players && S.players[oldName]){
     S.players[newName]=[...(S.players[newName]||[]),...S.players[oldName]];
     delete S.players[oldName];
+    updates[`players/${oldName}`]=null;
+    updates[`players/${newName}`]=S.players[newName];
     changed=true;
   }
   if(S.att){
@@ -714,6 +751,8 @@ function migrateCategoryRename(oldName, newName){
       if(S.att[date] && S.att[date][oldName]){
         S.att[date][newName]={...(S.att[date][newName]||{}),...S.att[date][oldName]};
         delete S.att[date][oldName];
+        updates[`att/${date}/${oldName}`]=null;
+        updates[`att/${date}/${newName}`]=S.att[date][newName];
         changed=true;
       }
     });
@@ -723,6 +762,8 @@ function migrateCategoryRename(oldName, newName){
       if(S.notes[date] && S.notes[date][oldName]!==undefined){
         if(S.notes[date][newName]===undefined) S.notes[date][newName]=S.notes[date][oldName];
         delete S.notes[date][oldName];
+        updates[`notes/${date}/${oldName}`]=null;
+        updates[`notes/${date}/${newName}`]=S.notes[date][newName];
         changed=true;
       }
     });
@@ -733,23 +774,29 @@ function migrateCategoryRename(oldName, newName){
         const newKey=newName+"::"+key.slice((oldName+"::").length);
         S.profiles[newKey]=S.profiles[key];
         delete S.profiles[key];
+        updates[`profiles/${key}`]=null;
+        updates[`profiles/${newKey}`]=S.profiles[newKey];
         changed=true;
       }
     });
   }
-  if(changed) debounceSave();
+  if(changed){
+    isWriting=true;
+    update(dbRef, updates).catch(()=>{}).finally(()=>{ setTimeout(()=>{isWriting=false;},1000); });
+  }
 }
 
 // ═══════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════
 function getA(d,c,n){return S.att?.[d]?.[c]?.[n]??null;}
-function setA(d,c,n,v){if(!S.att[d])S.att[d]={};if(!S.att[d][c])S.att[d][c]={};S.att[d][c][n]=v;}
+function setA(d,c,n,v){if(!S.att[d])S.att[d]={};if(!S.att[d][c])S.att[d][c]={};S.att[d][c][n]=v;queueUpdate(`att/${d}/${c}/${n}`,v);}
 function getNote(d,c){return S.notes?.[d]?.[c]??"";}
 function setNote(d,c,v){
   if(!S.notes) S.notes={};
   if(!S.notes[d]) S.notes[d]={};
   S.notes[d][c]=v;
+  queueUpdate(`notes/${d}/${c}`,v);
 }
 function catStats(d,c){
   const pl=S.players[c]||[];
@@ -912,20 +959,27 @@ function movePlayerToCategory(fromCat, name, toCat){
   src.splice(idx,1);
   if(!S.players[toCat]) S.players[toCat]=[];
   S.players[toCat].push(name);
+  queueUpdate(`players/${fromCat}`, S.players[fromCat]);
+  queueUpdate(`players/${toCat}`, S.players[toCat]);
   Object.keys(S.att||{}).forEach(d=>{
     if(!S.att[d]) return;
     if(!S.att[d][toCat]) S.att[d][toCat]={};
     if(S.att[d][fromCat]&&name in S.att[d][fromCat]){
       S.att[d][toCat][name]=S.att[d][fromCat][name];
       delete S.att[d][fromCat][name];
+      queueUpdate(`att/${d}/${fromCat}`, S.att[d][fromCat]);
+      queueUpdate(`att/${d}/${toCat}`, S.att[d][toCat]);
     }
   });
   if(S.profiles){
     const ok=fromCat+'::'+name, nk=toCat+'::'+name;
-    if(S.profiles[ok]){S.profiles[nk]=S.profiles[ok];delete S.profiles[ok];}
+    if(S.profiles[ok]){
+      S.profiles[nk]=S.profiles[ok];delete S.profiles[ok];
+      queueUpdate(`profiles/${ok}`, null);
+      queueUpdate(`profiles/${nk}`, S.profiles[nk]);
+    }
   }
   activeTab=toCat;
-  debounceSave();
   buildCatTabs(); renderContent(); updateGrandStats();
   toast('✅ '+name+' moved to '+toCat);
 }
@@ -1057,7 +1111,7 @@ function saveProfile(cat,name,data){
   if(!S.profiles)S.profiles={};
   const key=cat+"::"+name;
   S.profiles[key]=data;
-  debounceSave();
+  queueUpdate(`profiles/${key}`,data);
 }
 
 window.openProfile=function(cat,name){
@@ -1136,12 +1190,11 @@ window.onNote = function(v){
   if(saved){ saved.classList.remove("show"); }
   clearTimeout(noteT);
   noteT = setTimeout(()=>{
-    debounceSave();
     if(saved){ saved.classList.add("show"); setTimeout(()=>saved.classList.remove("show"), 2000); }
   }, 800);
 };
 
-function _refresh(){buildCatTabs();renderContent();updateGrandStats();debounceSave();}
+function _refresh(){buildCatTabs();renderContent();updateGrandStats();}
 
 window.toggleEdit = function(){
   if(!canEditCat(activeTab)){toast('👁️ View only — not your category');return;}
@@ -1280,17 +1333,22 @@ window.saveRename = function(cat,oldName,newName){
   if(idx===-1){toast('Player not found!');return;}
   if(pl.includes(newName)){toast('Name already exists!');return;}
   S.players[cat][idx]=newName;
+  queueUpdate(`players/${cat}`, S.players[cat]);
   Object.keys(S.att||{}).forEach(d=>{
     if(S.att[d]&&S.att[d][cat]&&oldName in S.att[d][cat]){
       S.att[d][cat][newName]=S.att[d][cat][oldName];
       delete S.att[d][cat][oldName];
+      queueUpdate(`att/${d}/${cat}`, S.att[d][cat]);
     }
   });
   if(S.profiles){
     const ok=cat+'::'+oldName,nk=cat+'::'+newName;
-    if(S.profiles[ok]){S.profiles[nk]=S.profiles[ok];delete S.profiles[ok];}
+    if(S.profiles[ok]){
+      S.profiles[nk]=S.profiles[ok];delete S.profiles[ok];
+      queueUpdate(`profiles/${ok}`, null);
+      queueUpdate(`profiles/${nk}`, S.profiles[nk]);
+    }
   }
-  debounceSave();
   toast('✅ Renamed to '+newName);
   renderContent();
 };
@@ -1329,6 +1387,8 @@ window.dragDrop=function(e,toCat,toName){
   const tgt=S.players[toCat]||[];
   const tgtIdx=tgt.indexOf(toName);
   tgt.splice(tgtIdx===-1?tgt.length:tgtIdx,0,fromName);
+  queueUpdate(`players/${fromCat}`, S.players[fromCat]);
+  queueUpdate(`players/${toCat}`, S.players[toCat]);
   if(fromCat!==toCat){
     Object.keys(S.att||{}).forEach(d=>{
       if(!S.att[d]) return;
@@ -1336,15 +1396,20 @@ window.dragDrop=function(e,toCat,toName){
       if(S.att[d][fromCat]&&fromName in S.att[d][fromCat]){
         S.att[d][toCat][fromName]=S.att[d][fromCat][fromName];
         delete S.att[d][fromCat][fromName];
+        queueUpdate(`att/${d}/${fromCat}`, S.att[d][fromCat]);
+        queueUpdate(`att/${d}/${toCat}`, S.att[d][toCat]);
       }
     });
     if(S.profiles){
       const ok=fromCat+'::'+fromName,nk=toCat+'::'+fromName;
-      if(S.profiles[ok]){S.profiles[nk]=S.profiles[ok];delete S.profiles[ok];}
+      if(S.profiles[ok]){
+        S.profiles[nk]=S.profiles[ok];delete S.profiles[ok];
+        queueUpdate(`profiles/${ok}`, null);
+        queueUpdate(`profiles/${nk}`, S.profiles[nk]);
+      }
     }
     activeTab=toCat;
   }
-  debounceSave();
   buildCatTabs(); renderContent();
   toast('✅ '+(fromCat!==toCat?fromName+' moved to '+toCat:'Reordered!'));
 };
@@ -1356,7 +1421,8 @@ window.addPlayer = function(){
   if((S.players[activeTab]||[]).includes(name)){toast("Already exists!");return;}
   if(!S.players[activeTab])S.players[activeTab]=[];
   S.players[activeTab].push(name);
-  inp.value="";_refresh();debounceSave();toast("✅ "+name+" added!");
+  queueUpdate(`players/${activeTab}`, S.players[activeTab]);
+  inp.value="";_refresh();toast("✅ "+name+" added!");
 };
 
 window.askDel = function(cat,name){
@@ -1369,9 +1435,18 @@ window.confirmDel = function(){
   if(!delTarget)return;
   const{cat,name}=delTarget;
   S.players[cat]=(S.players[cat]||[]).filter(n=>n!==name);
-  Object.keys(S.att).forEach(d=>{if(S.att[d]?.[cat])delete S.att[d][cat][name];});
-  if(S.profiles){ delete S.profiles[cat+"::"+name]; }
-  hideModal("delModal");_refresh();debounceSave();toast("🗑 Removed!");delTarget=null;
+  queueUpdate(`players/${cat}`, S.players[cat]);
+  Object.keys(S.att).forEach(d=>{
+    if(S.att[d]?.[cat] && name in S.att[d][cat]){
+      delete S.att[d][cat][name];
+      queueUpdate(`att/${d}/${cat}`, S.att[d][cat]);
+    }
+  });
+  if(S.profiles && S.profiles[cat+"::"+name]!==undefined){
+    delete S.profiles[cat+"::"+name];
+    queueUpdate(`profiles/${cat}::${name}`, null);
+  }
+  hideModal("delModal");_refresh();toast("🗑 Removed!");delTarget=null;
 };
 
 window.switchPage = function(page){
