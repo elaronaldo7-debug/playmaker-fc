@@ -926,6 +926,9 @@ function updateEditBtnVisibility(){
   }
 }
 
+function displayCategoryName(c){ return c === "MORNING SESSION" ? "MORNING" : c; }
+function sessionLabelForCategory(c){ return c === "MORNING SESSION" ? "Morning" : "Evening"; }
+
 function buildCatTabs(){
   updateEditBtnVisibility();
   const bar=document.getElementById("catTabs"); bar.innerHTML="";
@@ -933,7 +936,7 @@ function buildCatTabs(){
     const st=catStats(curDate,c);
     const el=document.createElement("div");
     el.className="ctab"+(c===activeTab?" on":"");
-    el.innerHTML=`<div class="ctab-name">${ICONS[c]||"👥"} ${c}</div>
+    el.innerHTML=`<div class="ctab-name">${ICONS[c]||"👥"} ${displayCategoryName(c)}</div>
       <div class="ctab-row"><span class="cp">${st.p}P</span><span class="ca">${st.a}A</span>${st.u>0?`<span class="cu">${st.u}?</span>`:""}</div>`;
     el.onclick=()=>{activeTab=c;buildCatTabs();renderContent();};
     // Drop zone on category tab
@@ -1025,7 +1028,7 @@ function renderContent(){
   let h=`<div class="cat-summary">
     <div class="cat-top">
       <div class="cat-ic">${ICONS[c]||"👥"}</div>
-      <div><div class="cat-nm">${c}</div><div class="cat-mt">${pl.length} players · Evening</div></div>
+      <div><div class="cat-nm">${displayCategoryName(c)}</div><div class="cat-mt">${pl.length} players · ${sessionLabelForCategory(c)}</div></div>
       <div class="cat-r">
         <div class="cat-pn">${st.p}<span style="font-size:13px;opacity:.45">/${pl.length}</span></div>
         <div class="cat-pl">Present today</div>
@@ -1521,7 +1524,7 @@ function renderHistory(){
         <div class="hdate-badge"><div class="hdb-day">${fd.day}</div><div class="hdb-mon">${fd.mon}</div></div>
         <div class="hcard-info">
           <div class="hcard-dow">${fd.dow}</div>
-          <div class="hcard-note">${firstNote||"Evening Session"}</div>
+          <div class="hcard-note">${firstNote||"Attendance"}</div>
         </div>
         <div class="hcard-grand">
           <div class="hgp">${gp}<span style="font-size:13px;color:var(--muted);font-family:var(--fb)">/${gt}</span></div>
@@ -1776,12 +1779,12 @@ window.exportCSV = function(){
   const d=curDate;let csv="Date,Session,Category,Name,Status\n";
   Object.keys(S.players).forEach(c=>(S.players[c]||[]).forEach(n=>{
     const s=getA(d,c,n),st=s===true?"Present":s===false?"Absent":"Not Marked";
-    csv+=`${d},Evening,${c},"${n}",${st}\n`;
+    csv+=`${d},${sessionLabelForCategory(c)},${c},"${n}",${st}\n`;
   }));
   dl("playmaker_fc_"+d+".csv",csv,"text/csv");toast("📊 CSV exported!");
 };
 window.exportAll = function(){
-  const d=curDate;let txt="PLAYMAKER FC\nEvening Session · "+d+"\n"+"=".repeat(40)+"\n\n";
+  const d=curDate;let txt="PLAYMAKER FC\nAttendance · "+d+"\n"+"=".repeat(40)+"\n\n";
   let gp=0,ga=0;
   Object.keys(S.players).forEach(c=>{
     const pl=S.players[c]||[];
@@ -1799,7 +1802,7 @@ window.exportAll = function(){
 window.exportCurrent = function(){
   const d=curDate,c=activeTab,pl=S.players[c]||[];
   const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false),um=pl.filter(n=>getA(d,c,n)===null);
-  let txt="PLAYMAKER FC — "+c+"\nEvening | "+d+"\n"+"=".repeat(30)+"\nPRESENT ("+pr.length+"):\n";
+  let txt="PLAYMAKER FC — "+displayCategoryName(c)+"\n"+sessionLabelForCategory(c)+" | "+d+"\n"+"=".repeat(30)+"\nPRESENT ("+pr.length+"):\n";
   txt+=(pr.map((p,i)=>(i+1)+". "+p).join("\n")||"None")+"\n\nABSENT ("+ab.length+"):\n";
   txt+=(ab.map((p,i)=>(i+1)+". "+p).join("\n")||"None")+"\n";
   if(um.length)txt+="\nNOT MARKED: "+um.join(", ")+"\n";
@@ -1807,7 +1810,7 @@ window.exportCurrent = function(){
   dl("pfc_"+c.replace(/ /g,"_")+"_"+d+".txt",txt,"text/plain");toast("📄 Exported!");
 };
 window.copyWA = function(){
-  const d=curDate;let msg="⚽ *PLAYMAKER FC — Evening Session*\n📅 "+d+"\n\n";
+  const d=curDate;let msg="⚽ *PLAYMAKER FC — Attendance*\n📅 "+d+"\n\n";
   Object.keys(S.players).forEach(c=>{
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false);
@@ -1829,7 +1832,7 @@ window.shareWACurrent = function(){
   const fd=fmtDate(d);
 
   let msg="*PLAYMAKER FC*\n";
-  msg+="*"+c+"* — Evening Session\n";
+  msg+="*"+displayCategoryName(c)+"* — "+sessionLabelForCategory(c)+" Session\n";
   msg+=fd.dow+", "+fd.day+" "+fd.mon+"\n";
   msg+="--------------------\n\n";
 
@@ -1895,7 +1898,7 @@ window.exportAllHistory = function(){
 
 window.exportHistDate = function(d){
   const fd=fmtDate(d);
-  let txt="PLAYMAKER FC\nEvening Session - "+fd.dow+", "+fd.day+" "+fd.mon+"\n"+"=".repeat(40)+"\n\n";
+  let txt="PLAYMAKER FC\nAttendance - "+fd.dow+", "+fd.day+" "+fd.mon+"\n"+"=".repeat(40)+"\n\n";
   let gp=0,ga=0;
   Object.keys(S.players).forEach(c=>{
     const pl=S.players[c]||[];
@@ -1915,7 +1918,7 @@ window.exportHistDate = function(d){
 
 window.shareHistWA = function(d){
   const fd=fmtDate(d);
-  let msg="*PLAYMAKER FC*\nEvening Session - "+fd.dow+", "+fd.day+" "+fd.mon+"\n--------------------\n\n";
+  let msg="*PLAYMAKER FC*\nAttendance - "+fd.dow+", "+fd.day+" "+fd.mon+"\n--------------------\n\n";
   let gp=0,gt=0;
   Object.keys(S.players).forEach(c=>{
     const pl=S.players[c]||[];
