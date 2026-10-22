@@ -720,6 +720,8 @@ function setSyncErr(){ document.getElementById("syncDot").className="sync-dot er
 
 function ensureDefaults() {
   migrateCategoryRename("BASIC 3","KEEPER");
+  // Keep Morning Session visible even when Firebase has no roster saved for it yet.
+  if (!Array.isArray(S.players["MORNING SESSION"])) S.players["MORNING SESSION"] = [];
   // Only add category if it doesn't exist at all in Firebase
   // Never overwrite existing player lists — Firebase is the source of truth
   const hasAnyPlayers = Object.values(S.players||{}).some(arr => arr && arr.length > 0);
