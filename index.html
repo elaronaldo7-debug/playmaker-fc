@@ -95,11 +95,11 @@ body{overflow:hidden}
 .page.on{display:block}
 
 /* CAT TABS */
-.cat-tabs{background:var(--navy2);border-bottom:1px solid var(--border);overflow-x:auto;display:flex;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:sticky;top:0;z-index:99}
+.cat-tabs{background:var(--navy2);border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden;display:flex;flex-wrap:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:sticky;top:0;z-index:99;max-width:100%;min-width:0}
 .cat-tabs::-webkit-scrollbar{display:none}
-.ctab{padding:8px 10px;font-size:11px;white-space:nowrap;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);font-weight:600;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:72px}
+.ctab{box-sizing:border-box;flex:0 0 auto;padding:8px 10px;font-size:11px;white-space:nowrap;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);font-weight:600;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:76px;width:max-content}
 .ctab.on{color:#fff;border-bottom-color:var(--red)}
-.ctab-name{font-size:11px;font-weight:700}
+.ctab-name{font-size:11px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:3px;flex-wrap:nowrap;max-width:none}
 .ctab-row{display:flex;gap:3px}
 .cp{font-size:10px;background:rgba(39,174,96,.25);color:var(--green);border-radius:5px;padding:1px 5px;font-weight:700}
 .ca{font-size:10px;background:rgba(192,57,43,.25);color:#ef9a9a;border-radius:5px;padding:1px 5px;font-weight:700}
