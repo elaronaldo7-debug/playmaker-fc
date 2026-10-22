@@ -534,12 +534,12 @@ setPersistence(auth, browserLocalPersistence).catch(()=>{});
 // ═══════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════
-// Maps each Firebase Auth login email to a role + owned category.
+// Maps each Firebase Auth login email to a role + owned category/categories.
 // Admin (cat:null) can view & edit every category.
-// Coach can view every category but can only edit/mark attendance for their own "cat".
+// Coach can view every category but can only edit/mark attendance for their assigned category/categories.
 const COACH_MAP = {
   "prasanna@playmakerfc.com": { role:"Admin", cat:null,     name:"Prasanna" },
-  "dinesh@playmakerfc.com":   { role:"Coach", cat:"BASIC 1", name:"Dinesh" },
+  "dinesh@playmakerfc.com":   { role:"Coach", cat:"MORNING SESSION", cats:["MORNING SESSION","BASIC 1"], name:"Dinesh" },
   "arup@playmakerfc.com":     { role:"Coach", cat:"BASIC 2", name:"Arup" },
   "danush@playmakerfc.com":   { role:"Coach", cat:"KEEPER", name:"Danush" },
   "vicky@playmakerfc.com":    { role:"Coach", cat:"U9",      name:"Vicky" },
@@ -551,9 +551,10 @@ let currentRole = null;     // "Admin" | "Coach"
 let currentCat = null;      // owned category, null for Admin
 let currentEmail = null;
 let currentDisplayName = null;
-function canEditCat(cat){ return currentRole==="Admin" || cat===currentCat; }
+function canEditCat(cat){ return currentRole==="Admin" || cat===currentCat || (COACH_MAP[currentEmail]?.cats||[]).includes(cat); }
 const DEFAULT_PLAYERS = {
   "COACHES":["ARUP","DINESH","ELA","MYCAL","PUGAZH","VICKY"],
+  "MORNING SESSION":[],
   "BASIC 1":["AHIL KARTHIKEYAN","DHIYAN","DHEERAJ","SRI KRISHNA","PRASENNAJITH","HARASHAVARADHAN","ABIGAIL","NIGARTHTHANA","TEJESHVARAN","YUGAN","MITHRAN","MOGITHRAN","DHAKSHIN","MADHAV","SUJAN","AARON PHILIP","AARUSH ABHILASH","SAI KRISHNA","ARJUN","THANOOSH TEJA","ANUJ","ELAMBHAARATHI","SAKTHI DHARAN","KRISH","SIVA PRIYA","KOWSHIKA","PRANAV","INIDHA","ISHAAN","RITHUVA"],
   "BASIC 2":["SUGANANDARAJA","DEESHITHAN","RAHUL","RAGHAV","ABINOAM","GUHAN JAI","SHAZAN","ANISHWAR","AKSHITH","SAI CHARAN","VINISH","RAJA RAM","SENTHIL BALAJI","KISHAN","JANITH","MRUTHYUN","RAJA GOPAL","INIYAVAN","JASWIN SELLAN","NIVAN","SREEKAVAN"],
   "KEEPER":[],
@@ -563,8 +564,8 @@ const DEFAULT_PLAYERS = {
   "U13":["MADHAV KRISH","SHRIJITH","MAKESH PRIYAN","KOVARSHAN","SARVESH VARA","DINESH RAJ","HEMA RAJ","CHRIS JONATHAN","ANAV DEEPAK","AIDEN","ALWIN JOEL"],
   "U15":["PRAKALATHAN","SANJAY","HEMNATH","SALAMON","PRADEEP (VISHAL)","ROHIT","BHARATH KUMAR","WIGGLES (VICKY)","HEMESH","ARAVIND","NAVEEN","MUHAYANTHU","EASWAR","STEPHAN","VEDANTT","SRIMAN","HARI"]
 };
-const CAT_ORDER = ["COACHES","BASIC 1","BASIC 2","KEEPER","U7","U9","U11","U13","U15"];
-const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","KEEPER":"🧤","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋"};
+const CAT_ORDER = ["COACHES","MORNING SESSION","BASIC 1","BASIC 2","KEEPER","U7","U9","U11","U13","U15"];
+const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","KEEPER":"🧤","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋","MORNING SESSION":"🌅"};
 
 // ═══════════════════════════════════════
 // STATE
