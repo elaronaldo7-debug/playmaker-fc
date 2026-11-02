@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Playmaker FC">
 <meta name="theme-color" content="#0a1628">
-<meta name="pmfc-build" content="firebase-source-of-truth-layout-refined-2026-11-02">
+<meta name="pmfc-build" content="pmfc-fix-counts-layout-2026-11-02">
 <link rel="apple-touch-icon" href="/playmaker-fc/icon-192x192.png">
 <title>Playmaker FC</title>
 <!-- PWA Manifest inline -->
@@ -375,76 +375,11 @@ body{overflow:hidden}
 /* TOAST */
 .toast{position:fixed;bottom:calc(70px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);border:1px solid var(--border)}
 .toast.show{opacity:1}
-
-
-/* PLAYMAKER FC — layout and spacing refinement (visual only) */
-#pageAtt,#pageRep{min-width:0;}
-#attMain{min-width:0;}
-.cat-tabs{
-  gap:6px;padding:8px 10px 0;align-items:stretch;
-  scroll-padding-inline:10px;scroll-snap-type:x proximity;
-  overscroll-behavior-x:contain;
-}
-.ctab{
-  flex:0 0 auto;min-width:88px;max-width:124px;padding:9px 12px 10px;
-  border:1px solid transparent;border-bottom:3px solid transparent;
-  border-radius:10px 10px 0 0;gap:5px;scroll-snap-align:start;
-}
-.ctab.on{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.07);border-bottom-color:var(--red);}
-.ctab-name{font-size:12px;line-height:1.15;text-align:center;white-space:normal;overflow-wrap:anywhere;}
-.ctab-row{gap:4px;justify-content:center;flex-wrap:wrap;}
-.cp,.ca,.cu{font-size:10px;min-width:22px;text-align:center;padding:2px 6px;line-height:1.2;}
-.content{width:100%;padding:14px 14px 24px;}
-.cat-summary{margin-bottom:14px;border-radius:14px;}
-.cat-top{padding:15px 16px;gap:12px;}
-.cat-nm{font-size:19px;line-height:1.15;}
-.cat-mt{line-height:1.4;}
-.cat-counts{min-height:64px;}
-.cc{padding:12px 5px;display:flex;flex-direction:column;justify-content:center;gap:3px;}
-.ccn{font-size:23px;}
-.ccl{font-size:9px;line-height:1.2;}
-.act-row{gap:8px;margin:0 0 14px;}
-.abtn{min-height:42px;padding:10px 6px;font-size:11px;line-height:1.2;border-radius:11px;}
-.add-row{gap:9px;margin-bottom:14px;}
-.add-inp{min-width:0;min-height:42px;padding:11px 13px;}
-.add-btn{width:46px;min-width:46px;min-height:42px;}
-.sec-h{padding:11px 3px 6px;font-size:10px;}
-.plist{gap:8px;margin-bottom:16px;}
-.pcard{min-height:58px;border-radius:12px;}
-.pcard-body{gap:11px;padding:10px 12px;}
-.pcard-av{width:34px;height:34px;border-radius:9px;}
-.pcard-name{font-size:13px;line-height:1.35;}
-.pcard-btns{min-height:58px;}
-.ptap{width:56px;min-width:56px;font-size:10px;}
-.ptap-ic{font-size:17px;}
-.prof-btn{width:40px;min-width:40px;}
-.del-btn{width:42px;min-width:42px;}
-.search-wrap{padding:10px 14px 8px;}
-.search-inp{min-height:44px;border-radius:12px;}
-#bdayStrip{padding:0 2px;}
-.nav-tab{min-width:0;padding:8px 2px;}
-
-@media(min-width:600px){
-  .content{max-width:720px;padding:18px 20px 28px;}
-  .cat-tabs{justify-content:center;}
-  .ctab{min-width:96px;}
-  .pcard-name{font-size:14px;}
-  .ptap{width:62px;min-width:62px;}
-}
-@media(max-width:380px){
-  .app-hdr{padding-left:10px;padding-right:10px;}
-  .hdr-top{gap:7px;}
-  .hdr-title{font-size:15px;}
-  .hbtn{font-size:10px;padding:6px 7px;}
-  .content{padding:11px 10px 22px;}
-  .ctab{min-width:82px;padding:8px 9px 9px;}
-  .cat-top{padding:12px 12px;}
-  .cat-nm{font-size:17px;}
-  .ptap{width:49px;min-width:49px;}
-  .pcard-body{gap:8px;padding:9px 8px;}
-  .pcard-name{font-size:12px;}
-}
-
+/* FIX: category tabs stick below the header, not behind it */
+.cat-tabs{top:var(--hdr-h,0px)}
+.ctab.mine .ctab-name::after{content:' ●';color:var(--gold);font-size:8px}
+.ctab.ro{opacity:.7}.ctab.on.ro{opacity:1}
+.hcat:last-child:nth-child(odd){grid-column:1/-1;border-right:none}
 </style>
 </head>
 <body>
@@ -643,7 +578,7 @@ let deferredInstallPrompt = null;
 let repMonth = todayStr().slice(0,7);
 let repTab = "COACHES";
 
-function todayStr(){ return new Date().toISOString().split("T")[0]; }
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function ini(n){ return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function fmtDate(d){
@@ -722,75 +657,28 @@ if (isIOS && !isInStandalone) {
 let firebaseInitialLoadComplete = false;
 let firebaseListenerUnsubscribe = null;
 
-// Safely expose legacy category names in the current app without deleting
-// the original Firebase records. Existing player names are merged uniquely.
-async function normalizeLegacyCategoriesAfterLoad() {
-  const updates = {};
-  const players = S.players;
-
-  // MORNING SESSION is the old Firebase key; the current UI uses MORNING.
-  const oldMorning = Array.isArray(players["MORNING SESSION"]) ? players["MORNING SESSION"] : [];
-  const currentMorning = Array.isArray(players.MORNING) ? players.MORNING : [];
-  const mergedMorning = [...currentMorning];
-  oldMorning.forEach(name => { if (!mergedMorning.includes(name)) mergedMorning.push(name); });
-  if (oldMorning.length || !Array.isArray(players.MORNING)) {
-    players.MORNING = mergedMorning;
-    updates["players/MORNING"] = mergedMorning;
-  }
-
-  // ST and SU are represented by one combined tab. Keep old Firebase keys
-  // untouched; copy their data into the combined category for display/export.
-  const oldWeekend = ["ST", "SU"].some(k => Array.isArray(players[k]));
-  const weekend = Array.isArray(players["ST & SU"]) ? [...players["ST & SU"]] : [];
-  ["ST", "SU"].forEach(k => (Array.isArray(players[k]) ? players[k] : []).forEach(name => {
-    if (!weekend.includes(name)) weekend.push(name);
-  }));
-  if (oldWeekend || !Array.isArray(players["ST & SU"])) {
-    players["ST & SU"] = weekend;
-    updates["players/ST & SU"] = weekend;
-  }
-
-  // Copy old attendance and notes into the new category names, preserving
-  // every original path in Firebase as a safety backup.
-  Object.entries(S.att || {}).forEach(([date, day]) => {
-    if (!day || typeof day !== "object") return;
-    // Preserve current MORNING marks when the same player exists in both keys.
-    const morning = { ...(day["MORNING SESSION"] || {}), ...(day.MORNING || {}) };
-    if (Object.keys(morning).length) {
-      S.att[date].MORNING = morning;
-      updates[`att/${date}/MORNING`] = morning;
-    }
-    // Legacy ST/SU marks are copied first; existing combined-category marks win.
-    const combined = { ...(day.ST || {}), ...(day.SU || {}), ...(day["ST & SU"] || {}) };
-    if (Object.keys(combined).length) {
-      S.att[date]["ST & SU"] = combined;
-      updates[`att/${date}/ST & SU`] = combined;
-    }
+// Only the categories in CAT_ORDER are used. Old Firebase keys (MORNING SESSION, ST, SU)
+// are never merged back or written, and are ignored in every count.
+function catList(){ return CAT_ORDER.slice(); }
+function normalizePlayers(p){
+  const out={};
+  CAT_ORDER.forEach(c=>{
+    const raw=p&&p[c];
+    const list=Array.isArray(raw)?raw:(raw&&typeof raw==="object"?Object.values(raw):[]);
+    out[c]=[...new Set(list.filter(n=>typeof n==="string"&&n!==""))];
   });
-  Object.entries(S.notes || {}).forEach(([date, notes]) => {
-    if (!notes || typeof notes !== "object") return;
-    if (notes["MORNING SESSION"] !== undefined && notes.MORNING === undefined) {
-      notes.MORNING = notes["MORNING SESSION"];
-      updates[`notes/${date}/MORNING`] = notes.MORNING;
-    }
-    if (notes["ST & SU"] === undefined && (notes.ST !== undefined || notes.SU !== undefined)) {
-      notes["ST & SU"] = notes.ST !== undefined ? notes.ST : notes.SU;
-      updates[`notes/${date}/ST & SU`] = notes["ST & SU"];
-    }
-  });
-  Object.entries(S.profiles || {}).forEach(([key, profile]) => {
-    let target = null;
-    if (key.startsWith("MORNING SESSION::")) target = "MORNING::" + key.slice("MORNING SESSION::".length);
-    else if (key.startsWith("ST::") || key.startsWith("SU::")) target = "ST & SU::" + key.slice(key.indexOf("::") + 2);
-    if (target && !S.profiles[target]) {
-      S.profiles[target] = profile;
-      updates[`profiles/${target}`] = profile;
-    }
-  });
-
-  if (Object.keys(updates).length) {
-    try { await update(dbRef, updates); } catch (e) { setSyncErr(); }
-  }
+  return out;
+}
+// a category counts for a date only if at least one of its current players was marked
+function catHeld(d,c){ return (S.players[c]||[]).some(n=>getA(d,c,n)!==null); }
+function catsFor(d){ return catList().filter(c=>catHeld(d,c)); }
+function setHdrH(){ const h=document.querySelector(".app-hdr"); if(h&&h.offsetHeight) document.documentElement.style.setProperty("--hdr-h",h.offsetHeight+"px"); }
+window.addEventListener("resize",setHdrH);
+function fixTabScroll(bar,sl){
+  bar.scrollLeft=sl;
+  const on=bar.querySelector(".ctab.on"); if(!on) return;
+  const l=on.offsetLeft, r=l+on.offsetWidth;
+  if(l<bar.scrollLeft) bar.scrollLeft=l-8; else if(r>bar.scrollLeft+bar.clientWidth) bar.scrollLeft=r-bar.clientWidth+8;
 }
 
 function startFirebaseListener() {
@@ -812,7 +700,7 @@ function startFirebaseListener() {
     firebaseInitialLoadComplete = true;
     setSyncOk();
 
-    if (firstLoad) await normalizeLegacyCategoriesAfterLoad();
+    S.players = normalizePlayers(S.players);
 
     if (!document.getElementById("appScreen").classList.contains("hidden")) {
       if (firstLoad) {
@@ -1048,6 +936,7 @@ onAuthStateChanged(auth, user=>{
 // RENDER
 // ═══════════════════════════════════════
 function renderApp(){
+  setHdrH(); setTimeout(setHdrH,300);
   document.getElementById("dateInp").value = curDate;
   document.getElementById("monthInp").value = repMonth;
   buildCatTabs(); renderContent(); updateGrandStats();
@@ -1082,7 +971,7 @@ window.onDateChange = function(){ curDate=document.getElementById("dateInp").val
 
 function updateGrandStats(){
   let p=0,a=0,t=0,u=0;
-  Object.keys(S.players).forEach(c=>{const s=catStats(curDate,c);p+=s.p;a+=s.a;u+=s.u;t+=s.t;});
+  catList().forEach(c=>{const s=catStats(curDate,c);p+=s.p;a+=s.a;u+=s.u;t+=s.t;});
   document.getElementById("sP").textContent=p;
   document.getElementById("sA").textContent=a;
   document.getElementById("sT").textContent=t;
@@ -1101,13 +990,14 @@ function updateEditBtnVisibility(){
   }
 }
 
-function buildCatTabs(){
+function buildCatTabs(){ const b=document.getElementById("catTabs"); const sl=b.scrollLeft; _buildCatTabs(); fixTabScroll(b,sl); }
+function _buildCatTabs(){
   updateEditBtnVisibility();
   const bar=document.getElementById("catTabs"); bar.innerHTML="";
   CAT_ORDER.filter(c=>S.players[c]).forEach(c=>{
     const st=catStats(curDate,c);
     const el=document.createElement("div");
-    el.className="ctab"+(c===activeTab?" on":"");
+    el.className="ctab"+(c===activeTab?" on":"")+(currentRole!=="Admin"&&canEditCat(c)?" mine":"")+(canEditCat(c)?"":" ro");
     el.innerHTML=`<div class="ctab-name">${ICONS[c]||"👥"} ${c}</div>
       <div class="ctab-row"><span class="cp">${st.p}P</span><span class="ca">${st.a}A</span>${st.u>0?`<span class="cu">${st.u}?</span>`:""}</div>`;
     el.onclick=()=>{activeTab=c;buildCatTabs();renderContent();};
@@ -1644,7 +1534,7 @@ window.switchPage = function(page){
 // ═══════════════════════════════════════
 function renderHistory(){
   const dates=Object.keys(S.att||{}).filter(d=>
-    Object.values(S.att[d]||{}).some(co=>Object.values(co||{}).some(v=>v!==null))
+    catList().some(c=>catHeld(d,c))
   ).sort((a,b)=>b.localeCompare(a));
 
   document.getElementById("histSub").textContent=dates.length+" session"+(dates.length!==1?"s":"")+" recorded";
@@ -1655,7 +1545,7 @@ function renderHistory(){
   let html="";
   dates.forEach(d=>{
     const fd=fmtDate(d); let gp=0,ga=0,gt=0;
-    const cats=Object.keys(S.players);
+    const cats=catsFor(d);
     cats.forEach(c=>{const s=catStats(d,c);gp+=s.p;ga+=s.a;gt+=s.t;});
     const isExp=(expandedHist===d);
     // collect all notes for this date
@@ -1799,16 +1689,14 @@ function monthKey(d){ return d.slice(0,7); }
 function getSessionDatesForMonth(month,cat){
   return Object.keys(S.att||{}).filter(d=>{
     if(monthKey(d)!==month) return false;
-    const co=S.att[d]?.[cat];
-    if(!co) return false;
-    return Object.values(co).some(v=>v!==null);
+    return catHeld(d,cat);
   }).sort();
 }
 
 function getAllSessionDatesForMonth(month){
   return Object.keys(S.att||{}).filter(d=>{
     if(monthKey(d)!==month) return false;
-    return Object.values(S.att[d]||{}).some(co=>Object.values(co||{}).some(v=>v!==null));
+    return catList().some(c=>catHeld(d,c));
   }).sort();
 }
 
@@ -1836,7 +1724,7 @@ function repCatStats(month,cat){
 function repOverallStats(month){
   const dates=getAllSessionDatesForMonth(month);
   let totalP=0,totalA=0,totalPlayers=0;
-  Object.keys(S.players).forEach(c=>{
+  catList().forEach(c=>{
     totalPlayers+=(S.players[c]||[]).length;
     const st=repCatStats(month,c);
     totalP+=st.totalP; totalA+=st.totalA;
@@ -1862,7 +1750,8 @@ function renderReport(){
   renderRepContent();
 }
 
-function buildRepCatTabs(){
+function buildRepCatTabs(){ const b=document.getElementById("repCatTabs"); const sl=b.scrollLeft; _buildRepCatTabs(); fixTabScroll(b,sl); }
+function _buildRepCatTabs(){
   const bar=document.getElementById("repCatTabs"); bar.innerHTML="";
   CAT_ORDER.filter(c=>S.players[c]).forEach(c=>{
     const st=repCatStats(repMonth,c);
@@ -1920,7 +1809,7 @@ function monthlyReportText(month){
   let txt="PLAYMAKER FC — MONTHLY REPORT\n"+monthLabel(month)+"\n"+"=".repeat(40)+"\n\n";
   const ov=repOverallStats(month);
   txt+="Total Sessions: "+ov.sessions+"\nOverall Attendance: "+ov.avgPct+"%\nTotal Players: "+ov.totalPlayers+"\n\n";
-  Object.keys(S.players).forEach(c=>{
+  catList().forEach(c=>{
     const st=repCatStats(month,c);
     if(!st.sessions) return;
     txt+="[ "+c+" ] — "+st.sessions+" session"+(st.sessions!==1?"s":"")+" · "+st.avgPct+"% avg\n"+"-".repeat(30)+"\n";
@@ -1948,7 +1837,7 @@ window.shareMonthlyReportWA=function(){
 // ═══════════════════════════════════════
 window.exportCSV = function(){
   const d=curDate;let csv="Date,Session,Category,Name,Status\n";
-  Object.keys(S.players).forEach(c=>(S.players[c]||[]).forEach(n=>{
+  catList().forEach(c=>(S.players[c]||[]).forEach(n=>{
     const s=getA(d,c,n),st=s===true?"Present":s===false?"Absent":"Not Marked";
     csv+=`${d},${sessionNameForCategory(c,d)},${c},"${n}",${st}\n`;
   }));
@@ -1957,7 +1846,7 @@ window.exportCSV = function(){
 window.exportAll = function(){
   const d=curDate;let txt="PLAYMAKER FC\nEvening Session · "+d+"\n"+"=".repeat(40)+"\n\n";
   let gp=0,ga=0;
-  Object.keys(S.players).forEach(c=>{
+  catsFor(d).forEach(c=>{
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false);
     gp+=pr.length;ga+=ab.length;
@@ -1982,7 +1871,7 @@ window.exportCurrent = function(){
 };
 window.copyWA = function(){
   const d=curDate;let msg="⚽ *PLAYMAKER FC — Evening Session*\n📅 "+d+"\n\n";
-  Object.keys(S.players).forEach(c=>{
+  catsFor(d).forEach(c=>{
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false);
     msg+=(ICONS[c]||"👥")+" *"+c+"* — "+pr.length+"/"+pl.length+"\n";
@@ -2040,7 +1929,7 @@ window.shareWACurrent = function(){
 
 window.exportAllHistory = function(){
   const dates=Object.keys(S.att||{}).filter(d=>
-    Object.values(S.att[d]||{}).some(co=>Object.values(co||{}).some(v=>v!==null))
+    catList().some(c=>catHeld(d,c))
   ).sort((a,b)=>a.localeCompare(b));
 
   if(!dates.length){toast("No history found!");return;}
@@ -2050,7 +1939,7 @@ window.exportAllHistory = function(){
     const fd=fmtDate(d);
     txt+="DATE: "+fd.dow+", "+fd.day+" "+fd.mon+" ("+d+")\n"+"=".repeat(50)+"\n";
     let gp=0,ga=0;
-    Object.keys(S.players).forEach(c=>{
+    catsFor(d).forEach(c=>{
       const pl=S.players[c]||[];
       const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false),um=pl.filter(n=>getA(d,c,n)===null);
       gp+=pr.length;ga+=ab.length;
@@ -2071,7 +1960,7 @@ window.exportHistDate = function(d){
   const fd=fmtDate(d);
   let txt="PLAYMAKER FC\nEvening Session - "+fd.dow+", "+fd.day+" "+fd.mon+"\n"+"=".repeat(40)+"\n\n";
   let gp=0,ga=0;
-  Object.keys(S.players).forEach(c=>{
+  catsFor(d).forEach(c=>{
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false),um=pl.filter(n=>getA(d,c,n)===null);
     gp+=pr.length;ga+=ab.length;
@@ -2091,7 +1980,7 @@ window.shareHistWA = function(d){
   const fd=fmtDate(d);
   let msg="*PLAYMAKER FC*\nEvening Session - "+fd.dow+", "+fd.day+" "+fd.mon+"\n--------------------\n\n";
   let gp=0,gt=0;
-  Object.keys(S.players).forEach(c=>{
+  catsFor(d).forEach(c=>{
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false);
     gp+=pr.length;gt+=pl.length;
