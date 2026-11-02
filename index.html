@@ -539,7 +539,7 @@ setPersistence(auth, browserLocalPersistence).catch(()=>{});
 // Coach can view every category but can only edit/mark attendance for their assigned category/categories.
 const COACH_MAP = {
   "prasanna@playmakerfc.com": { role:"Admin", cat:null,     name:"Prasanna" },
-  "dinesh@playmakerfc.com":   { role:"Coach", cat:"MORNING SESSION", cats:["MORNING SESSION","BASIC 1","ST","SU"], name:"Dinesh" },
+  "dinesh@playmakerfc.com":   { role:"Coach", cat:"MORNING SESSION", cats:["MORNING SESSION","BASIC 1","ST & SU"], name:"Dinesh" },
   "arup@playmakerfc.com":     { role:"Coach", cat:"BASIC 2", name:"Arup" },
   "danush@playmakerfc.com":   { role:"Coach", cat:"KEEPER", name:"Danush" },
   "vicky@playmakerfc.com":    { role:"Coach", cat:"U9",      name:"Vicky" },
@@ -564,8 +564,8 @@ const DEFAULT_PLAYERS = {
   "U13":["MADHAV KRISH","SHRIJITH","MAKESH PRIYAN","KOVARSHAN","SARVESH VARA","DINESH RAJ","HEMA RAJ","CHRIS JONATHAN","ANAV DEEPAK","AIDEN","ALWIN JOEL"],
   "U15":["PRAKALATHAN","SANJAY","HEMNATH","SALAMON","PRADEEP (VISHAL)","ROHIT","BHARATH KUMAR","WIGGLES (VICKY)","HEMESH","ARAVIND","NAVEEN","MUHAYANTHU","EASWAR","STEPHAN","VEDANTT","SRIMAN","HARI"]
 };
-const CAT_ORDER = ["COACHES","MORNING SESSION","BASIC 1","BASIC 2","ST","SU","KEEPER","U7","U9","U11","U13","U15"];
-const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","ST":"📅","SU":"📅","KEEPER":"🧤","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋","MORNING SESSION":"🌅"};
+const CAT_ORDER = ["COACHES","MORNING SESSION","BASIC 1","BASIC 2","ST & SU","KEEPER","U7","U9","U11","U13","U15"];
+const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","ST & SU":"📅","KEEPER":"🧤","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋","MORNING SESSION":"🌅"};
 
 // ═══════════════════════════════════════
 // STATE
@@ -722,9 +722,41 @@ function ensureDefaults() {
   migrateCategoryRename("BASIC 3","KEEPER");
   // Keep Morning Session visible even when Firebase has no roster saved for it yet.
   if (!Array.isArray(S.players["MORNING SESSION"])) S.players["MORNING SESSION"] = [];
-  // Weekend categories assigned to Dinesh. Preserve any existing Firebase rosters.
-  if (!Array.isArray(S.players["ST"])) S.players["ST"] = [];
-  if (!Array.isArray(S.players["SU"])) S.players["SU"] = [];
+  // Merge Saturday (ST) and Sunday (SU) into one shared weekend category.
+  // Existing players, attendance and notes are migrated without discarding saved data.
+  const weekendCat = "ST & SU";
+  const oldWeekendCats = ["ST", "SU"];
+  const weekendPlayers = Array.isArray(S.players[weekendCat]) ? [...S.players[weekendCat]] : [];
+  oldWeekendCats.forEach(oldCat => {
+    (S.players[oldCat] || []).forEach(name => { if (!weekendPlayers.includes(name)) weekendPlayers.push(name); });
+  });
+  if (oldWeekendCats.some(c => Array.isArray(S.players[c])) || !Array.isArray(S.players[weekendCat])) {
+    S.players[weekendCat] = weekendPlayers;
+    queueUpdate(`players/${weekendCat}`, weekendPlayers);
+    oldWeekendCats.forEach(c => { if (S.players[c] !== undefined) { delete S.players[c]; queueUpdate(`players/${c}`, null); } });
+  }
+  Object.keys(S.att || {}).forEach(date => {
+    const dayData = S.att[date] || {};
+    const merged = { ...(dayData[weekendCat] || {}) };
+    oldWeekendCats.forEach(oldCat => {
+      Object.entries(dayData[oldCat] || {}).forEach(([name, value]) => {
+        if (!(name in merged)) merged[name] = value;
+      });
+    });
+    if (oldWeekendCats.some(c => dayData[c])) {
+      dayData[weekendCat] = merged;
+      queueUpdate(`att/${date}/${weekendCat}`, merged);
+      oldWeekendCats.forEach(c => { if (dayData[c]) { delete dayData[c]; queueUpdate(`att/${date}/${c}`, null); } });
+    }
+  });
+  Object.keys(S.notes || {}).forEach(date => {
+    const dayNotes = S.notes[date] || {};
+    if (oldWeekendCats.some(c => dayNotes[c] !== undefined)) {
+      if (dayNotes[weekendCat] === undefined) dayNotes[weekendCat] = dayNotes.ST ?? dayNotes.SU ?? "";
+      queueUpdate(`notes/${date}/${weekendCat}`, dayNotes[weekendCat]);
+      oldWeekendCats.forEach(c => { if (dayNotes[c] !== undefined) { delete dayNotes[c]; queueUpdate(`notes/${date}/${c}`, null); } });
+    }
+  });
   // Only add category if it doesn't exist at all in Firebase
   // Never overwrite existing player lists — Firebase is the source of truth
   const hasAnyPlayers = Object.values(S.players||{}).some(arr => arr && arr.length > 0);
@@ -930,7 +962,18 @@ function updateEditBtnVisibility(){
 }
 
 function displayCategoryName(c){ return c === "MORNING SESSION" ? "MORNING" : c; }
-function sessionLabelForCategory(c){ if(c === "MORNING SESSION") return "Morning"; if(c === "ST") return "Saturday"; if(c === "SU") return "Sunday"; return "Evening"; }
+function sessionLabelForCategory(c, date){
+  if(c === "MORNING SESSION") return "Morning";
+  if(c === "ST & SU") {
+    if(date) {
+      const day = new Date(date + "T00:00:00").getDay();
+      if(day === 6) return "Saturday";
+      if(day === 0) return "Sunday";
+    }
+    return "Saturday / Sunday";
+  }
+  return "Evening";
+}
 
 function buildCatTabs(){
   updateEditBtnVisibility();
@@ -1782,7 +1825,7 @@ window.exportCSV = function(){
   const d=curDate;let csv="Date,Session,Category,Name,Status\n";
   Object.keys(S.players).forEach(c=>(S.players[c]||[]).forEach(n=>{
     const s=getA(d,c,n),st=s===true?"Present":s===false?"Absent":"Not Marked";
-    csv+=`${d},${sessionLabelForCategory(c)},${c},"${n}",${st}\n`;
+    csv+=`${d},${sessionLabelForCategory(c,d)},${c},"${n}",${st}\n`;
   }));
   dl("playmaker_fc_"+d+".csv",csv,"text/csv");toast("📊 CSV exported!");
 };
@@ -1793,7 +1836,7 @@ window.exportAll = function(){
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false);
     gp+=pr.length;ga+=ab.length;
-    txt+="[ "+c+" ] — "+sessionLabelForCategory(c)+"  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
+    txt+="[ "+c+" ] — "+sessionLabelForCategory(c,d)+"  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
     if(pr.length)txt+="Present:\n"+pr.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     if(ab.length)txt+="Absent:\n"+ab.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     const nt=getNote(d,c);if(nt)txt+="📝 Notes: "+nt+"\n";
@@ -1805,7 +1848,7 @@ window.exportAll = function(){
 window.exportCurrent = function(){
   const d=curDate,c=activeTab,pl=S.players[c]||[];
   const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false),um=pl.filter(n=>getA(d,c,n)===null);
-  let txt="PLAYMAKER FC — "+displayCategoryName(c)+"\n"+sessionLabelForCategory(c)+" | "+d+"\n"+"=".repeat(30)+"\nPRESENT ("+pr.length+"):\n";
+  let txt="PLAYMAKER FC — "+displayCategoryName(c)+"\n"+sessionLabelForCategory(c,d)+" | "+d+"\n"+"=".repeat(30)+"\nPRESENT ("+pr.length+"):\n";
   txt+=(pr.map((p,i)=>(i+1)+". "+p).join("\n")||"None")+"\n\nABSENT ("+ab.length+"):\n";
   txt+=(ab.map((p,i)=>(i+1)+". "+p).join("\n")||"None")+"\n";
   if(um.length)txt+="\nNOT MARKED: "+um.join(", ")+"\n";
@@ -1817,7 +1860,7 @@ window.copyWA = function(){
   Object.keys(S.players).forEach(c=>{
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false);
-    msg+=(ICONS[c]||"👥")+" *"+c+"* — "+sessionLabelForCategory(c)+" · "+pr.length+"/"+pl.length+"\n";
+    msg+=(ICONS[c]||"👥")+" *"+c+"* — "+sessionLabelForCategory(c,d)+" · "+pr.length+"/"+pl.length+"\n";
     if(ab.length)msg+="❌ Absent: "+ab.join(", ")+"\n";
     const nt=getNote(d,c);if(nt)msg+="📝 "+nt+"\n";
     msg+="\n";
@@ -1835,7 +1878,7 @@ window.shareWACurrent = function(){
   const fd=fmtDate(d);
 
   let msg="*PLAYMAKER FC*\n";
-  msg+="*"+displayCategoryName(c)+"* — "+sessionLabelForCategory(c)+" Session\n";
+  msg+="*"+displayCategoryName(c)+"* — "+sessionLabelForCategory(c,d)+" Session\n";
   msg+=fd.dow+", "+fd.day+" "+fd.mon+"\n";
   msg+="--------------------\n\n";
 
@@ -1907,7 +1950,7 @@ window.exportHistDate = function(d){
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false),um=pl.filter(n=>getA(d,c,n)===null);
     gp+=pr.length;ga+=ab.length;
-    txt+="[ "+c+" ] — "+sessionLabelForCategory(c)+"  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
+    txt+="[ "+c+" ] — "+sessionLabelForCategory(c,d)+"  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
     if(pr.length)txt+="Present:\n"+pr.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     if(ab.length)txt+="Absent:\n"+ab.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     if(um.length)txt+="Not Marked: "+um.join(", ")+"\n";
