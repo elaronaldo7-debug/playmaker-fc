@@ -684,12 +684,14 @@ async function normalizeLegacyCategoriesAfterLoad() {
   // every original path in Firebase as a safety backup.
   Object.entries(S.att || {}).forEach(([date, day]) => {
     if (!day || typeof day !== "object") return;
-    const morning = { ...(day.MORNING || {}), ...(day["MORNING SESSION"] || {}) };
+    // Preserve current MORNING marks when the same player exists in both keys.
+    const morning = { ...(day["MORNING SESSION"] || {}), ...(day.MORNING || {}) };
     if (Object.keys(morning).length) {
       S.att[date].MORNING = morning;
       updates[`att/${date}/MORNING`] = morning;
     }
-    const combined = { ...(day["ST & SU"] || {}), ...(day.ST || {}), ...(day.SU || {}) };
+    // Legacy ST/SU marks are copied first; existing combined-category marks win.
+    const combined = { ...(day.ST || {}), ...(day.SU || {}), ...(day["ST & SU"] || {}) };
     if (Object.keys(combined).length) {
       S.att[date]["ST & SU"] = combined;
       updates[`att/${date}/ST & SU`] = combined;
@@ -701,7 +703,7 @@ async function normalizeLegacyCategoriesAfterLoad() {
       notes.MORNING = notes["MORNING SESSION"];
       updates[`notes/${date}/MORNING`] = notes.MORNING;
     }
-    if ((notes.ST !== undefined || notes.SU !== undefined) && notes["ST & SU"] === undefined) {
+    if (notes["ST & SU"] === undefined && (notes.ST !== undefined || notes.SU !== undefined)) {
       notes["ST & SU"] = notes.ST !== undefined ? notes.ST : notes.SU;
       updates[`notes/${date}/ST & SU`] = notes["ST & SU"];
     }
