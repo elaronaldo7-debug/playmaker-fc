@@ -380,6 +380,12 @@ body{overflow:hidden}
 .ctab.mine .ctab-name::after{content:' ●';color:var(--gold);font-size:8px}
 .ctab.ro{opacity:.7}.ctab.on.ro{opacity:1}
 .hcat:last-child:nth-child(odd){grid-column:1/-1;border-right:none}
+/* compact side-scroll category tabs */
+.cat-tabs{scroll-snap-type:x proximity;padding:0 4px}
+.ctab{padding:6px 8px 5px;min-width:0;gap:2px;scroll-snap-align:start;flex-shrink:0}
+.ctab-name{font-size:11px;letter-spacing:.01em}
+.ctab-row{gap:2px}
+.cp,.ca,.cu{font-size:9px;padding:1px 4px}
 </style>
 </head>
 <body>
