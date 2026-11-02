@@ -652,12 +652,81 @@ if (isIOS && !isInStandalone) {
 let firebaseInitialLoadComplete = false;
 let firebaseListenerUnsubscribe = null;
 
+// Safely expose legacy category names in the current app without deleting
+// the original Firebase records. Existing player names are merged uniquely.
+async function normalizeLegacyCategoriesAfterLoad() {
+  const updates = {};
+  const players = S.players;
+
+  // MORNING SESSION is the old Firebase key; the current UI uses MORNING.
+  const oldMorning = Array.isArray(players["MORNING SESSION"]) ? players["MORNING SESSION"] : [];
+  const currentMorning = Array.isArray(players.MORNING) ? players.MORNING : [];
+  const mergedMorning = [...currentMorning];
+  oldMorning.forEach(name => { if (!mergedMorning.includes(name)) mergedMorning.push(name); });
+  if (oldMorning.length || !Array.isArray(players.MORNING)) {
+    players.MORNING = mergedMorning;
+    updates["players/MORNING"] = mergedMorning;
+  }
+
+  // ST and SU are represented by one combined tab. Keep old Firebase keys
+  // untouched; copy their data into the combined category for display/export.
+  const oldWeekend = ["ST", "SU"].some(k => Array.isArray(players[k]));
+  const weekend = Array.isArray(players["ST & SU"]) ? [...players["ST & SU"]] : [];
+  ["ST", "SU"].forEach(k => (Array.isArray(players[k]) ? players[k] : []).forEach(name => {
+    if (!weekend.includes(name)) weekend.push(name);
+  }));
+  if (oldWeekend || !Array.isArray(players["ST & SU"])) {
+    players["ST & SU"] = weekend;
+    updates["players/ST & SU"] = weekend;
+  }
+
+  // Copy old attendance and notes into the new category names, preserving
+  // every original path in Firebase as a safety backup.
+  Object.entries(S.att || {}).forEach(([date, day]) => {
+    if (!day || typeof day !== "object") return;
+    const morning = { ...(day.MORNING || {}), ...(day["MORNING SESSION"] || {}) };
+    if (Object.keys(morning).length) {
+      S.att[date].MORNING = morning;
+      updates[`att/${date}/MORNING`] = morning;
+    }
+    const combined = { ...(day["ST & SU"] || {}), ...(day.ST || {}), ...(day.SU || {}) };
+    if (Object.keys(combined).length) {
+      S.att[date]["ST & SU"] = combined;
+      updates[`att/${date}/ST & SU`] = combined;
+    }
+  });
+  Object.entries(S.notes || {}).forEach(([date, notes]) => {
+    if (!notes || typeof notes !== "object") return;
+    if (notes["MORNING SESSION"] !== undefined && notes.MORNING === undefined) {
+      notes.MORNING = notes["MORNING SESSION"];
+      updates[`notes/${date}/MORNING`] = notes.MORNING;
+    }
+    if ((notes.ST !== undefined || notes.SU !== undefined) && notes["ST & SU"] === undefined) {
+      notes["ST & SU"] = notes.ST !== undefined ? notes.ST : notes.SU;
+      updates[`notes/${date}/ST & SU`] = notes["ST & SU"];
+    }
+  });
+  Object.entries(S.profiles || {}).forEach(([key, profile]) => {
+    let target = null;
+    if (key.startsWith("MORNING SESSION::")) target = "MORNING::" + key.slice("MORNING SESSION::".length);
+    else if (key.startsWith("ST::") || key.startsWith("SU::")) target = "ST & SU::" + key.slice(key.indexOf("::") + 2);
+    if (target && !S.profiles[target]) {
+      S.profiles[target] = profile;
+      updates[`profiles/${target}`] = profile;
+    }
+  });
+
+  if (Object.keys(updates).length) {
+    try { await update(dbRef, updates); } catch (e) { setSyncErr(); }
+  }
+}
+
 function startFirebaseListener() {
   // Prevent duplicate listeners after a logout/login cycle.
   if (firebaseListenerUnsubscribe) firebaseListenerUnsubscribe();
   firebaseInitialLoadComplete = false;
 
-  firebaseListenerUnsubscribe = onValue(dbRef, (snapshot) => {
+  firebaseListenerUnsubscribe = onValue(dbRef, async (snapshot) => {
     // Always use the Firebase snapshot as the source of truth.
     // Do not ignore the first snapshot, even if a previous local operation was pending.
     const remote = snapshot.val();
@@ -670,6 +739,8 @@ function startFirebaseListener() {
     const firstLoad = !firebaseInitialLoadComplete;
     firebaseInitialLoadComplete = true;
     setSyncOk();
+
+    if (firstLoad) await normalizeLegacyCategoriesAfterLoad();
 
     if (!document.getElementById("appScreen").classList.contains("hidden")) {
       if (firstLoad) {
