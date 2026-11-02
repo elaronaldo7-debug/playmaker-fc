@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Playmaker FC">
 <meta name="theme-color" content="#0a1628">
-<meta name="pmfc-build" content="firebase-source-of-truth-2026-11-02">
+<meta name="pmfc-build" content="firebase-source-of-truth-layout-refined-2026-11-02">
 <link rel="apple-touch-icon" href="/playmaker-fc/icon-192x192.png">
 <title>Playmaker FC</title>
 <!-- PWA Manifest inline -->
@@ -375,6 +375,76 @@ body{overflow:hidden}
 /* TOAST */
 .toast{position:fixed;bottom:calc(70px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transition:opacity .25s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5);border:1px solid var(--border)}
 .toast.show{opacity:1}
+
+
+/* PLAYMAKER FC — layout and spacing refinement (visual only) */
+#pageAtt,#pageRep{min-width:0;}
+#attMain{min-width:0;}
+.cat-tabs{
+  gap:6px;padding:8px 10px 0;align-items:stretch;
+  scroll-padding-inline:10px;scroll-snap-type:x proximity;
+  overscroll-behavior-x:contain;
+}
+.ctab{
+  flex:0 0 auto;min-width:88px;max-width:124px;padding:9px 12px 10px;
+  border:1px solid transparent;border-bottom:3px solid transparent;
+  border-radius:10px 10px 0 0;gap:5px;scroll-snap-align:start;
+}
+.ctab.on{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.07);border-bottom-color:var(--red);}
+.ctab-name{font-size:12px;line-height:1.15;text-align:center;white-space:normal;overflow-wrap:anywhere;}
+.ctab-row{gap:4px;justify-content:center;flex-wrap:wrap;}
+.cp,.ca,.cu{font-size:10px;min-width:22px;text-align:center;padding:2px 6px;line-height:1.2;}
+.content{width:100%;padding:14px 14px 24px;}
+.cat-summary{margin-bottom:14px;border-radius:14px;}
+.cat-top{padding:15px 16px;gap:12px;}
+.cat-nm{font-size:19px;line-height:1.15;}
+.cat-mt{line-height:1.4;}
+.cat-counts{min-height:64px;}
+.cc{padding:12px 5px;display:flex;flex-direction:column;justify-content:center;gap:3px;}
+.ccn{font-size:23px;}
+.ccl{font-size:9px;line-height:1.2;}
+.act-row{gap:8px;margin:0 0 14px;}
+.abtn{min-height:42px;padding:10px 6px;font-size:11px;line-height:1.2;border-radius:11px;}
+.add-row{gap:9px;margin-bottom:14px;}
+.add-inp{min-width:0;min-height:42px;padding:11px 13px;}
+.add-btn{width:46px;min-width:46px;min-height:42px;}
+.sec-h{padding:11px 3px 6px;font-size:10px;}
+.plist{gap:8px;margin-bottom:16px;}
+.pcard{min-height:58px;border-radius:12px;}
+.pcard-body{gap:11px;padding:10px 12px;}
+.pcard-av{width:34px;height:34px;border-radius:9px;}
+.pcard-name{font-size:13px;line-height:1.35;}
+.pcard-btns{min-height:58px;}
+.ptap{width:56px;min-width:56px;font-size:10px;}
+.ptap-ic{font-size:17px;}
+.prof-btn{width:40px;min-width:40px;}
+.del-btn{width:42px;min-width:42px;}
+.search-wrap{padding:10px 14px 8px;}
+.search-inp{min-height:44px;border-radius:12px;}
+#bdayStrip{padding:0 2px;}
+.nav-tab{min-width:0;padding:8px 2px;}
+
+@media(min-width:600px){
+  .content{max-width:720px;padding:18px 20px 28px;}
+  .cat-tabs{justify-content:center;}
+  .ctab{min-width:96px;}
+  .pcard-name{font-size:14px;}
+  .ptap{width:62px;min-width:62px;}
+}
+@media(max-width:380px){
+  .app-hdr{padding-left:10px;padding-right:10px;}
+  .hdr-top{gap:7px;}
+  .hdr-title{font-size:15px;}
+  .hbtn{font-size:10px;padding:6px 7px;}
+  .content{padding:11px 10px 22px;}
+  .ctab{min-width:82px;padding:8px 9px 9px;}
+  .cat-top{padding:12px 12px;}
+  .cat-nm{font-size:17px;}
+  .ptap{width:49px;min-width:49px;}
+  .pcard-body{gap:8px;padding:9px 8px;}
+  .pcard-name{font-size:12px;}
+}
+
 </style>
 </head>
 <body>
