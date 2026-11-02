@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Playmaker FC">
 <meta name="theme-color" content="#0a1628">
+<meta name="pmfc-build" content="firebase-source-of-truth-2026-11-02">
 <link rel="apple-touch-icon" href="/playmaker-fc/icon-192x192.png">
 <title>Playmaker FC</title>
 <!-- PWA Manifest inline -->
@@ -95,11 +96,11 @@ body{overflow:hidden}
 .page.on{display:block}
 
 /* CAT TABS */
-.cat-tabs{background:var(--navy2);border-bottom:1px solid var(--border);overflow-x:auto;overflow-y:hidden;display:flex;flex-wrap:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:sticky;top:0;z-index:99;max-width:100%;min-width:0}
+.cat-tabs{background:var(--navy2);border-bottom:1px solid var(--border);overflow-x:auto;display:flex;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:sticky;top:0;z-index:99}
 .cat-tabs::-webkit-scrollbar{display:none}
-.ctab{box-sizing:border-box;flex:0 0 auto;padding:8px 10px;font-size:11px;white-space:nowrap;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);font-weight:600;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:76px;width:max-content}
+.ctab{padding:8px 10px;font-size:11px;white-space:nowrap;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);font-weight:600;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:72px}
 .ctab.on{color:#fff;border-bottom-color:var(--red)}
-.ctab-name{font-size:11px;font-weight:700;white-space:nowrap;display:flex;align-items:center;gap:3px;flex-wrap:nowrap;max-width:none}
+.ctab-name{font-size:11px;font-weight:700}
 .ctab-row{display:flex;gap:3px}
 .cp{font-size:10px;background:rgba(39,174,96,.25);color:var(--green);border-radius:5px;padding:1px 5px;font-weight:700}
 .ca{font-size:10px;background:rgba(192,57,43,.25);color:#ef9a9a;border-radius:5px;padding:1px 5px;font-weight:700}
@@ -534,12 +535,12 @@ setPersistence(auth, browserLocalPersistence).catch(()=>{});
 // ═══════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════
-// Maps each Firebase Auth login email to a role + owned category/categories.
+// Maps each Firebase Auth login email to a role + owned category.
 // Admin (cat:null) can view & edit every category.
-// Coach can view every category but can only edit/mark attendance for their assigned category/categories.
+// Coach can view every category but can only edit/mark attendance for their own "cat".
 const COACH_MAP = {
   "prasanna@playmakerfc.com": { role:"Admin", cat:null,     name:"Prasanna" },
-  "dinesh@playmakerfc.com":   { role:"Coach", cat:"MORNING SESSION", cats:["MORNING SESSION","BASIC 1","ST & SU"], name:"Dinesh" },
+  "dinesh@playmakerfc.com":   { role:"Coach", cat:["MORNING","BASIC 1","ST & SU"], name:"Dinesh" },
   "arup@playmakerfc.com":     { role:"Coach", cat:"BASIC 2", name:"Arup" },
   "danush@playmakerfc.com":   { role:"Coach", cat:"KEEPER", name:"Danush" },
   "vicky@playmakerfc.com":    { role:"Coach", cat:"U9",      name:"Vicky" },
@@ -551,21 +552,9 @@ let currentRole = null;     // "Admin" | "Coach"
 let currentCat = null;      // owned category, null for Admin
 let currentEmail = null;
 let currentDisplayName = null;
-function canEditCat(cat){ return currentRole==="Admin" || cat===currentCat || (COACH_MAP[currentEmail]?.cats||[]).includes(cat); }
-const DEFAULT_PLAYERS = {
-  "COACHES":["ARUP","DINESH","ELA","MYCAL","PUGAZH","VICKY"],
-  "MORNING SESSION":[],
-  "BASIC 1":["AHIL KARTHIKEYAN","DHIYAN","DHEERAJ","SRI KRISHNA","PRASENNAJITH","HARASHAVARADHAN","ABIGAIL","NIGARTHTHANA","TEJESHVARAN","YUGAN","MITHRAN","MOGITHRAN","DHAKSHIN","MADHAV","SUJAN","AARON PHILIP","AARUSH ABHILASH","SAI KRISHNA","ARJUN","THANOOSH TEJA","ANUJ","ELAMBHAARATHI","SAKTHI DHARAN","KRISH","SIVA PRIYA","KOWSHIKA","PRANAV","INIDHA","ISHAAN","RITHUVA"],
-  "BASIC 2":["SUGANANDARAJA","DEESHITHAN","RAHUL","RAGHAV","ABINOAM","GUHAN JAI","SHAZAN","ANISHWAR","AKSHITH","SAI CHARAN","VINISH","RAJA RAM","SENTHIL BALAJI","KISHAN","JANITH","MRUTHYUN","RAJA GOPAL","INIYAVAN","JASWIN SELLAN","NIVAN","SREEKAVAN"],
-  "KEEPER":[],
-  "U7":["SATHYADEV","SUGANESHWARAN","SIDDHARTH","MITHRA","CHATRESH","MISHANTH"],
-  "U9":["CHIRAYU","EON","NIVED KRISHNA (ADHI)","SANJEEVAN","KRITHICK","RIVAAN","DAVID","KAVIN","PRANAV","AADHI"],
-  "U11":["BHAVIN","ROGITHRAAJ","RITHEESH","ADHIDEV","DHARMENDRA","AKHILINIYAN","NITHILAN","THEEKSHA","LOHITH"],
-  "U13":["MADHAV KRISH","SHRIJITH","MAKESH PRIYAN","KOVARSHAN","SARVESH VARA","DINESH RAJ","HEMA RAJ","CHRIS JONATHAN","ANAV DEEPAK","AIDEN","ALWIN JOEL"],
-  "U15":["PRAKALATHAN","SANJAY","HEMNATH","SALAMON","PRADEEP (VISHAL)","ROHIT","BHARATH KUMAR","WIGGLES (VICKY)","HEMESH","ARAVIND","NAVEEN","MUHAYANTHU","EASWAR","STEPHAN","VEDANTT","SRIMAN","HARI"]
-};
-const CAT_ORDER = ["COACHES","MORNING SESSION","BASIC 1","BASIC 2","ST & SU","KEEPER","U7","U9","U11","U13","U15"];
-const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","ST & SU":"📅","KEEPER":"🧤","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋","MORNING SESSION":"🌅"};
+function canEditCat(cat){ return currentRole==="Admin" || (Array.isArray(currentCat) ? currentCat.includes(cat) : cat===currentCat); }
+const CAT_ORDER = ["COACHES","MORNING","BASIC 1","BASIC 2","ST & SU","KEEPER","U7","U9","U11","U13","U15"];
+const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","KEEPER":"🧤","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋","MORNING":"🌅","ST & SU":"📅"};
 
 // ═══════════════════════════════════════
 // STATE
@@ -660,20 +649,46 @@ if (isIOS && !isInStandalone) {
 // ═══════════════════════════════════════
 // FIREBASE
 // ═══════════════════════════════════════
+let firebaseInitialLoadComplete = false;
+let firebaseListenerUnsubscribe = null;
+
 function startFirebaseListener() {
-  onValue(dbRef, (snapshot) => {
-    if (isWriting) return;
+  // Prevent duplicate listeners after a logout/login cycle.
+  if (firebaseListenerUnsubscribe) firebaseListenerUnsubscribe();
+  firebaseInitialLoadComplete = false;
+
+  firebaseListenerUnsubscribe = onValue(dbRef, (snapshot) => {
+    // Always use the Firebase snapshot as the source of truth.
+    // Do not ignore the first snapshot, even if a previous local operation was pending.
     const remote = snapshot.val();
-    if (remote && remote.players) {
-      S = remote;
-      if(!S.profiles) S.profiles={};
-      ensureDefaults();
-    }
+    S = (remote && typeof remote === "object") ? remote : {};
+    if (!S.players || typeof S.players !== "object" || Array.isArray(S.players)) S.players = {};
+    if (!S.att || typeof S.att !== "object" || Array.isArray(S.att)) S.att = {};
+    if (!S.notes || typeof S.notes !== "object" || Array.isArray(S.notes)) S.notes = {};
+    if (!S.profiles || typeof S.profiles !== "object" || Array.isArray(S.profiles)) S.profiles = {};
+
+    const firstLoad = !firebaseInitialLoadComplete;
+    firebaseInitialLoadComplete = true;
     setSyncOk();
+
     if (!document.getElementById("appScreen").classList.contains("hidden")) {
-      buildCatTabs(); renderContent(); updateGrandStats(); renderBdayStrip();
-      if (curPage === "hist") renderHistory();
-      if (curPage === "rep") renderReport();
+      if (firstLoad) {
+        // Select the coach's first assigned category only after Firebase data is loaded.
+        if (currentRole !== "Admin" && currentCat) {
+          const assigned = Array.isArray(currentCat) ? currentCat : [currentCat];
+          const firstExisting = assigned.find(cat => Array.isArray(S.players[cat]));
+          if (firstExisting) activeTab = firstExisting;
+        }
+        renderApp();
+        setTimeout(checkBirthdays, 2500);
+      } else {
+        buildCatTabs();
+        renderContent();
+        updateGrandStats();
+        renderBdayStrip();
+        if (curPage === "hist") renderHistory();
+        if (curPage === "rep") renderReport();
+      }
     }
   }, () => setSyncErr());
 }
@@ -718,56 +733,41 @@ function setSyncOk(){ document.getElementById("syncDot").className="sync-dot"; d
 function setSyncing(){ document.getElementById("syncDot").className="sync-dot saving"; document.getElementById("syncLbl").innerHTML='<strong>Saving...</strong>'; }
 function setSyncErr(){ document.getElementById("syncDot").className="sync-dot err"; document.getElementById("syncLbl").innerHTML='<strong>⚠️ Check internet</strong>'; }
 
-function ensureDefaults() {
-  migrateCategoryRename("BASIC 3","KEEPER");
-  // Keep Morning Session visible even when Firebase has no roster saved for it yet.
-  if (!Array.isArray(S.players["MORNING SESSION"])) S.players["MORNING SESSION"] = [];
-  // Merge Saturday (ST) and Sunday (SU) into one shared weekend category.
-  // Existing players, attendance and notes are migrated without discarding saved data.
-  const weekendCat = "ST & SU";
-  const oldWeekendCats = ["ST", "SU"];
-  const weekendPlayers = Array.isArray(S.players[weekendCat]) ? [...S.players[weekendCat]] : [];
-  oldWeekendCats.forEach(oldCat => {
-    (S.players[oldCat] || []).forEach(name => { if (!weekendPlayers.includes(name)) weekendPlayers.push(name); });
-  });
-  if (oldWeekendCats.some(c => Array.isArray(S.players[c])) || !Array.isArray(S.players[weekendCat])) {
-    S.players[weekendCat] = weekendPlayers;
-    queueUpdate(`players/${weekendCat}`, weekendPlayers);
-    oldWeekendCats.forEach(c => { if (S.players[c] !== undefined) { delete S.players[c]; queueUpdate(`players/${c}`, null); } });
+function migrateWeekendCategories(){
+  const oldKeys=["ST","SU"], newKey="ST & SU";
+  if(!S.players) S.players={};
+  const hasOld=oldKeys.some(k=>Array.isArray(S.players[k]));
+  if(hasOld){
+    const merged=[...(S.players[newKey]||[])];
+    oldKeys.forEach(k=>(S.players[k]||[]).forEach(n=>{if(!merged.includes(n)) merged.push(n);}));
+    S.players[newKey]=merged;
+    oldKeys.forEach(k=>delete S.players[k]);
+    queueUpdate(`players/${newKey}`,merged);
+    oldKeys.forEach(k=>queueUpdate(`players/${k}`,null));
+  } else if(!Array.isArray(S.players[newKey])) {
+    S.players[newKey]=[];
+    queueUpdate(`players/${newKey}`,[]);
   }
-  Object.keys(S.att || {}).forEach(date => {
-    const dayData = S.att[date] || {};
-    const merged = { ...(dayData[weekendCat] || {}) };
-    oldWeekendCats.forEach(oldCat => {
-      Object.entries(dayData[oldCat] || {}).forEach(([name, value]) => {
-        if (!(name in merged)) merged[name] = value;
-      });
-    });
-    if (oldWeekendCats.some(c => dayData[c])) {
-      dayData[weekendCat] = merged;
-      queueUpdate(`att/${date}/${weekendCat}`, merged);
-      oldWeekendCats.forEach(c => { if (dayData[c]) { delete dayData[c]; queueUpdate(`att/${date}/${c}`, null); } });
-    }
+  Object.keys(S.att||{}).forEach(d=>{
+    const merged={...(S.att[d][newKey]||{}),...(S.att[d].ST||{}),...(S.att[d].SU||{})};
+    if(Object.keys(merged).length) S.att[d][newKey]=merged;
+    ["ST","SU"].forEach(k=>{if(S.att[d][k]) delete S.att[d][k]; queueUpdate(`att/${d}/${k}`,null);});
+    if(Object.keys(merged).length) queueUpdate(`att/${d}/${newKey}`,merged);
   });
-  Object.keys(S.notes || {}).forEach(date => {
-    const dayNotes = S.notes[date] || {};
-    if (oldWeekendCats.some(c => dayNotes[c] !== undefined)) {
-      if (dayNotes[weekendCat] === undefined) dayNotes[weekendCat] = dayNotes.ST ?? dayNotes.SU ?? "";
-      queueUpdate(`notes/${date}/${weekendCat}`, dayNotes[weekendCat]);
-      oldWeekendCats.forEach(c => { if (dayNotes[c] !== undefined) { delete dayNotes[c]; queueUpdate(`notes/${date}/${c}`, null); } });
-    }
+  Object.keys(S.notes||{}).forEach(d=>{
+    const n=S.notes[d];
+    if(n.ST!==undefined||n.SU!==undefined){if(n[newKey]===undefined)n[newKey]=n.ST!==undefined?n.ST:n.SU;delete n.ST;delete n.SU;queueUpdate(`notes/${d}/${newKey}`,n[newKey]);queueUpdate(`notes/${d}/ST`,null);queueUpdate(`notes/${d}/SU`,null);}
   });
-  // Only add category if it doesn't exist at all in Firebase
-  // Never overwrite existing player lists — Firebase is the source of truth
-  const hasAnyPlayers = Object.values(S.players||{}).some(arr => arr && arr.length > 0);
-  if (!hasAnyPlayers) {
-    // First time setup only
-    Object.keys(DEFAULT_PLAYERS).forEach(c => {
-      if (!S.players[c]) S.players[c] = [...DEFAULT_PLAYERS[c]];
-    });
+  Object.keys(S.profiles||{}).forEach(k=>{
+    if(k.startsWith("ST::")||k.startsWith("SU::")){const nk=newKey+k.slice(k.indexOf("::"));if(!S.profiles[nk])S.profiles[nk]=S.profiles[k];delete S.profiles[k];queueUpdate(`profiles/${k}`,null);queueUpdate(`profiles/${nk}`,S.profiles[nk]);}
+  });
+}
+function sessionNameForCategory(cat,date){
+  if(cat==="ST & SU"){
+    const day=new Date(date+"T00:00:00").getDay();
+    return day===6?"Saturday":day===0?"Sunday":"Saturday / Sunday";
   }
-  if (!S.notes) S.notes = {};
-  if (!S.att) S.att = {};
+  return cat==="MORNING"?"Morning":"Evening";
 }
 
 // One-time migration: renames a category everywhere in the data (roster, attendance,
@@ -871,12 +871,10 @@ function launchApp(info) {
   currentCat = info.cat;
   currentDisplayName = info.name;
   document.getElementById("hdrSub").textContent = "Evening · " + info.name +
-    (info.role==="Admin" ? " · Admin (all categories)" : " · Coach (" + info.cat + ")");
+    (info.role==="Admin" ? " · Admin (all categories)" : " · Coach (" + (Array.isArray(info.cat)?info.cat.join(", "):info.cat) + ")");
   showScreen("appScreen");
+  // Wait for the first Firebase snapshot before rendering player data.
   startFirebaseListener();
-  if(info.role!=="Admin" && info.cat && S.players[info.cat]) activeTab = info.cat;
-  renderApp();
-  setTimeout(checkBirthdays, 2500);
 }
 
 // Reacts to Firebase Auth login/logout, including auto-login on page reload
@@ -909,7 +907,6 @@ onAuthStateChanged(auth, user=>{
 function renderApp(){
   document.getElementById("dateInp").value = curDate;
   document.getElementById("monthInp").value = repMonth;
-  ensureDefaults();
   buildCatTabs(); renderContent(); updateGrandStats();
   renderBdayStrip();
 }
@@ -961,20 +958,6 @@ function updateEditBtnVisibility(){
   }
 }
 
-function displayCategoryName(c){ return c === "MORNING SESSION" ? "MORNING" : c; }
-function sessionLabelForCategory(c, date){
-  if(c === "MORNING SESSION") return "Morning";
-  if(c === "ST & SU") {
-    if(date) {
-      const day = new Date(date + "T00:00:00").getDay();
-      if(day === 6) return "Saturday";
-      if(day === 0) return "Sunday";
-    }
-    return "Saturday / Sunday";
-  }
-  return "Evening";
-}
-
 function buildCatTabs(){
   updateEditBtnVisibility();
   const bar=document.getElementById("catTabs"); bar.innerHTML="";
@@ -982,7 +965,7 @@ function buildCatTabs(){
     const st=catStats(curDate,c);
     const el=document.createElement("div");
     el.className="ctab"+(c===activeTab?" on":"");
-    el.innerHTML=`<div class="ctab-name">${ICONS[c]||"👥"} ${displayCategoryName(c)}</div>
+    el.innerHTML=`<div class="ctab-name">${ICONS[c]||"👥"} ${c}</div>
       <div class="ctab-row"><span class="cp">${st.p}P</span><span class="ca">${st.a}A</span>${st.u>0?`<span class="cu">${st.u}?</span>`:""}</div>`;
     el.onclick=()=>{activeTab=c;buildCatTabs();renderContent();};
     // Drop zone on category tab
@@ -1074,7 +1057,7 @@ function renderContent(){
   let h=`<div class="cat-summary">
     <div class="cat-top">
       <div class="cat-ic">${ICONS[c]||"👥"}</div>
-      <div><div class="cat-nm">${displayCategoryName(c)}</div><div class="cat-mt">${pl.length} players · ${sessionLabelForCategory(c)}</div></div>
+      <div><div class="cat-nm">${c}</div><div class="cat-mt">${pl.length} players · ${sessionNameForCategory(c,curDate)}</div></div>
       <div class="cat-r">
         <div class="cat-pn">${st.p}<span style="font-size:13px;opacity:.45">/${pl.length}</span></div>
         <div class="cat-pl">Present today</div>
@@ -1091,7 +1074,7 @@ function renderContent(){
 
   if(!editable){
     h+=`<div style="background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--muted);text-align:center">
-      👁️ View only — ${currentRole==="Admin"?"":"this is not your category ("+(currentCat||"—")+"), so you can browse but not"} edit attendance here
+      👁️ View only — ${currentRole==="Admin"?"":"this is not your category ("+(Array.isArray(currentCat)?currentCat.join(", "):(currentCat||"—"))+"), so you can browse but not"} edit attendance here
     </div>`;
   } else if(editMode){
     h+=`<div class="add-row"><input class="add-inp" id="addInp" placeholder="New player name..." onkeydown="if(event.key==='Enter')addPlayer()"><button class="add-btn" onclick="addPlayer()">+</button></div>`;
@@ -1570,7 +1553,7 @@ function renderHistory(){
         <div class="hdate-badge"><div class="hdb-day">${fd.day}</div><div class="hdb-mon">${fd.mon}</div></div>
         <div class="hcard-info">
           <div class="hcard-dow">${fd.dow}</div>
-          <div class="hcard-note">${firstNote||"Attendance"}</div>
+          <div class="hcard-note">${firstNote||"Evening Session"}</div>
         </div>
         <div class="hcard-grand">
           <div class="hgp">${gp}<span style="font-size:13px;color:var(--muted);font-family:var(--fb)">/${gt}</span></div>
@@ -1726,7 +1709,6 @@ function monthLabel(month){
 }
 
 function renderReport(){
-  ensureDefaults();
   const ov=repOverallStats(repMonth);
   document.getElementById("repSub").textContent=monthLabel(repMonth);
   document.getElementById("repSummary").innerHTML=`
@@ -1798,7 +1780,7 @@ function monthlyReportText(month){
   Object.keys(S.players).forEach(c=>{
     const st=repCatStats(month,c);
     if(!st.sessions) return;
-    txt+="[ "+c+" ] — "+sessionLabelForCategory(c)+" · "+st.sessions+" session"+(st.sessions!==1?"s":"")+" · "+st.avgPct+"% avg\n"+"-".repeat(30)+"\n";
+    txt+="[ "+c+" ] — "+st.sessions+" session"+(st.sessions!==1?"s":"")+" · "+st.avgPct+"% avg\n"+"-".repeat(30)+"\n";
     st.perPlayer.forEach((p,i)=>{
       txt+="  "+(i+1)+". "+p.name+" — "+p.pct+"% ("+p.p+"P/"+p.a+"A)\n";
     });
@@ -1825,18 +1807,18 @@ window.exportCSV = function(){
   const d=curDate;let csv="Date,Session,Category,Name,Status\n";
   Object.keys(S.players).forEach(c=>(S.players[c]||[]).forEach(n=>{
     const s=getA(d,c,n),st=s===true?"Present":s===false?"Absent":"Not Marked";
-    csv+=`${d},${sessionLabelForCategory(c,d)},${c},"${n}",${st}\n`;
+    csv+=`${d},${sessionNameForCategory(c,d)},${c},"${n}",${st}\n`;
   }));
   dl("playmaker_fc_"+d+".csv",csv,"text/csv");toast("📊 CSV exported!");
 };
 window.exportAll = function(){
-  const d=curDate;let txt="PLAYMAKER FC\nAttendance · "+d+"\n"+"=".repeat(40)+"\n\n";
+  const d=curDate;let txt="PLAYMAKER FC\nEvening Session · "+d+"\n"+"=".repeat(40)+"\n\n";
   let gp=0,ga=0;
   Object.keys(S.players).forEach(c=>{
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false);
     gp+=pr.length;ga+=ab.length;
-    txt+="[ "+c+" ] — "+sessionLabelForCategory(c,d)+"  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
+    txt+="[ "+c+" ]  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
     if(pr.length)txt+="Present:\n"+pr.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     if(ab.length)txt+="Absent:\n"+ab.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     const nt=getNote(d,c);if(nt)txt+="📝 Notes: "+nt+"\n";
@@ -1848,7 +1830,7 @@ window.exportAll = function(){
 window.exportCurrent = function(){
   const d=curDate,c=activeTab,pl=S.players[c]||[];
   const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false),um=pl.filter(n=>getA(d,c,n)===null);
-  let txt="PLAYMAKER FC — "+displayCategoryName(c)+"\n"+sessionLabelForCategory(c,d)+" | "+d+"\n"+"=".repeat(30)+"\nPRESENT ("+pr.length+"):\n";
+  let txt="PLAYMAKER FC — "+(c==="ST & SU"?sessionNameForCategory(c,d):c)+"\n"+sessionNameForCategory(c,d)+" | "+d+"\n"+"=".repeat(30)+"\nPRESENT ("+pr.length+"):\n";
   txt+=(pr.map((p,i)=>(i+1)+". "+p).join("\n")||"None")+"\n\nABSENT ("+ab.length+"):\n";
   txt+=(ab.map((p,i)=>(i+1)+". "+p).join("\n")||"None")+"\n";
   if(um.length)txt+="\nNOT MARKED: "+um.join(", ")+"\n";
@@ -1856,11 +1838,11 @@ window.exportCurrent = function(){
   dl("pfc_"+c.replace(/ /g,"_")+"_"+d+".txt",txt,"text/plain");toast("📄 Exported!");
 };
 window.copyWA = function(){
-  const d=curDate;let msg="⚽ *PLAYMAKER FC — Attendance*\n📅 "+d+"\n\n";
+  const d=curDate;let msg="⚽ *PLAYMAKER FC — Evening Session*\n📅 "+d+"\n\n";
   Object.keys(S.players).forEach(c=>{
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false);
-    msg+=(ICONS[c]||"👥")+" *"+c+"* — "+sessionLabelForCategory(c,d)+" · "+pr.length+"/"+pl.length+"\n";
+    msg+=(ICONS[c]||"👥")+" *"+c+"* — "+pr.length+"/"+pl.length+"\n";
     if(ab.length)msg+="❌ Absent: "+ab.join(", ")+"\n";
     const nt=getNote(d,c);if(nt)msg+="📝 "+nt+"\n";
     msg+="\n";
@@ -1878,7 +1860,7 @@ window.shareWACurrent = function(){
   const fd=fmtDate(d);
 
   let msg="*PLAYMAKER FC*\n";
-  msg+="*"+displayCategoryName(c)+"* — "+sessionLabelForCategory(c,d)+" Session\n";
+  msg+="*"+(c==="ST & SU"?sessionNameForCategory(c,d):c)+"* — "+sessionNameForCategory(c,d)+" Session\n";
   msg+=fd.dow+", "+fd.day+" "+fd.mon+"\n";
   msg+="--------------------\n\n";
 
@@ -1944,13 +1926,13 @@ window.exportAllHistory = function(){
 
 window.exportHistDate = function(d){
   const fd=fmtDate(d);
-  let txt="PLAYMAKER FC\nAttendance - "+fd.dow+", "+fd.day+" "+fd.mon+"\n"+"=".repeat(40)+"\n\n";
+  let txt="PLAYMAKER FC\nEvening Session - "+fd.dow+", "+fd.day+" "+fd.mon+"\n"+"=".repeat(40)+"\n\n";
   let gp=0,ga=0;
   Object.keys(S.players).forEach(c=>{
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false),um=pl.filter(n=>getA(d,c,n)===null);
     gp+=pr.length;ga+=ab.length;
-    txt+="[ "+c+" ] — "+sessionLabelForCategory(c,d)+"  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
+    txt+="[ "+c+" ]  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
     if(pr.length)txt+="Present:\n"+pr.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     if(ab.length)txt+="Absent:\n"+ab.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     if(um.length)txt+="Not Marked: "+um.join(", ")+"\n";
@@ -1964,7 +1946,7 @@ window.exportHistDate = function(d){
 
 window.shareHistWA = function(d){
   const fd=fmtDate(d);
-  let msg="*PLAYMAKER FC*\nAttendance - "+fd.dow+", "+fd.day+" "+fd.mon+"\n--------------------\n\n";
+  let msg="*PLAYMAKER FC*\nEvening Session - "+fd.dow+", "+fd.day+" "+fd.mon+"\n--------------------\n\n";
   let gp=0,gt=0;
   Object.keys(S.players).forEach(c=>{
     const pl=S.players[c]||[];
@@ -2045,7 +2027,6 @@ function init(){
   // the Database Rules require auth (auth != null), a pre-login read would
   // be denied and wrongly show "Offline mode". Player data is loaded right
   // after a successful sign-in, by startFirebaseListener() inside launchApp().
-  ensureDefaults();
   document.getElementById("splashStatus").textContent="✅ Ready";
   // Screen switching (login vs app) is handled by the onAuthStateChanged
   // listener above, which fires automatically once Firebase Auth resolves
