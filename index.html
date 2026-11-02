@@ -539,7 +539,7 @@ setPersistence(auth, browserLocalPersistence).catch(()=>{});
 // Coach can view every category but can only edit/mark attendance for their assigned category/categories.
 const COACH_MAP = {
   "prasanna@playmakerfc.com": { role:"Admin", cat:null,     name:"Prasanna" },
-  "dinesh@playmakerfc.com":   { role:"Coach", cat:"MORNING SESSION", cats:["MORNING SESSION","BASIC 1"], name:"Dinesh" },
+  "dinesh@playmakerfc.com":   { role:"Coach", cat:"MORNING SESSION", cats:["MORNING SESSION","BASIC 1","ST","SU"], name:"Dinesh" },
   "arup@playmakerfc.com":     { role:"Coach", cat:"BASIC 2", name:"Arup" },
   "danush@playmakerfc.com":   { role:"Coach", cat:"KEEPER", name:"Danush" },
   "vicky@playmakerfc.com":    { role:"Coach", cat:"U9",      name:"Vicky" },
@@ -564,8 +564,8 @@ const DEFAULT_PLAYERS = {
   "U13":["MADHAV KRISH","SHRIJITH","MAKESH PRIYAN","KOVARSHAN","SARVESH VARA","DINESH RAJ","HEMA RAJ","CHRIS JONATHAN","ANAV DEEPAK","AIDEN","ALWIN JOEL"],
   "U15":["PRAKALATHAN","SANJAY","HEMNATH","SALAMON","PRADEEP (VISHAL)","ROHIT","BHARATH KUMAR","WIGGLES (VICKY)","HEMESH","ARAVIND","NAVEEN","MUHAYANTHU","EASWAR","STEPHAN","VEDANTT","SRIMAN","HARI"]
 };
-const CAT_ORDER = ["COACHES","MORNING SESSION","BASIC 1","BASIC 2","KEEPER","U7","U9","U11","U13","U15"];
-const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","KEEPER":"🧤","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋","MORNING SESSION":"🌅"};
+const CAT_ORDER = ["COACHES","MORNING SESSION","BASIC 1","BASIC 2","ST","SU","KEEPER","U7","U9","U11","U13","U15"];
+const ICONS={"BASIC 1":"⚽","BASIC 2":"⚽","ST":"📅","SU":"📅","KEEPER":"🧤","U7":"🌱","U9":"🏃","U11":"⚡","U13":"🔥","U15":"🏆","COACHES":"📋","MORNING SESSION":"🌅"};
 
 // ═══════════════════════════════════════
 // STATE
@@ -722,6 +722,9 @@ function ensureDefaults() {
   migrateCategoryRename("BASIC 3","KEEPER");
   // Keep Morning Session visible even when Firebase has no roster saved for it yet.
   if (!Array.isArray(S.players["MORNING SESSION"])) S.players["MORNING SESSION"] = [];
+  // Weekend categories assigned to Dinesh. Preserve any existing Firebase rosters.
+  if (!Array.isArray(S.players["ST"])) S.players["ST"] = [];
+  if (!Array.isArray(S.players["SU"])) S.players["SU"] = [];
   // Only add category if it doesn't exist at all in Firebase
   // Never overwrite existing player lists — Firebase is the source of truth
   const hasAnyPlayers = Object.values(S.players||{}).some(arr => arr && arr.length > 0);
@@ -927,7 +930,7 @@ function updateEditBtnVisibility(){
 }
 
 function displayCategoryName(c){ return c === "MORNING SESSION" ? "MORNING" : c; }
-function sessionLabelForCategory(c){ return c === "MORNING SESSION" ? "Morning" : "Evening"; }
+function sessionLabelForCategory(c){ if(c === "MORNING SESSION") return "Morning"; if(c === "ST") return "Saturday"; if(c === "SU") return "Sunday"; return "Evening"; }
 
 function buildCatTabs(){
   updateEditBtnVisibility();
@@ -1752,7 +1755,7 @@ function monthlyReportText(month){
   Object.keys(S.players).forEach(c=>{
     const st=repCatStats(month,c);
     if(!st.sessions) return;
-    txt+="[ "+c+" ] — "+st.sessions+" session"+(st.sessions!==1?"s":"")+" · "+st.avgPct+"% avg\n"+"-".repeat(30)+"\n";
+    txt+="[ "+c+" ] — "+sessionLabelForCategory(c)+" · "+st.sessions+" session"+(st.sessions!==1?"s":"")+" · "+st.avgPct+"% avg\n"+"-".repeat(30)+"\n";
     st.perPlayer.forEach((p,i)=>{
       txt+="  "+(i+1)+". "+p.name+" — "+p.pct+"% ("+p.p+"P/"+p.a+"A)\n";
     });
@@ -1790,7 +1793,7 @@ window.exportAll = function(){
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false);
     gp+=pr.length;ga+=ab.length;
-    txt+="[ "+c+" ]  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
+    txt+="[ "+c+" ] — "+sessionLabelForCategory(c)+"  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
     if(pr.length)txt+="Present:\n"+pr.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     if(ab.length)txt+="Absent:\n"+ab.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     const nt=getNote(d,c);if(nt)txt+="📝 Notes: "+nt+"\n";
@@ -1814,7 +1817,7 @@ window.copyWA = function(){
   Object.keys(S.players).forEach(c=>{
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false);
-    msg+=(ICONS[c]||"👥")+" *"+c+"* — "+pr.length+"/"+pl.length+"\n";
+    msg+=(ICONS[c]||"👥")+" *"+c+"* — "+sessionLabelForCategory(c)+" · "+pr.length+"/"+pl.length+"\n";
     if(ab.length)msg+="❌ Absent: "+ab.join(", ")+"\n";
     const nt=getNote(d,c);if(nt)msg+="📝 "+nt+"\n";
     msg+="\n";
@@ -1904,7 +1907,7 @@ window.exportHistDate = function(d){
     const pl=S.players[c]||[];
     const pr=pl.filter(n=>getA(d,c,n)===true),ab=pl.filter(n=>getA(d,c,n)===false),um=pl.filter(n=>getA(d,c,n)===null);
     gp+=pr.length;ga+=ab.length;
-    txt+="[ "+c+" ]  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
+    txt+="[ "+c+" ] — "+sessionLabelForCategory(c)+"  "+pr.length+"/"+pl.length+"\n"+"-".repeat(28)+"\n";
     if(pr.length)txt+="Present:\n"+pr.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     if(ab.length)txt+="Absent:\n"+ab.map((p,i)=>"  "+(i+1)+". "+p).join("\n")+"\n";
     if(um.length)txt+="Not Marked: "+um.join(", ")+"\n";
